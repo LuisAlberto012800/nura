@@ -30,6 +30,7 @@ Cuando la app crece, llega un archivo nuevo en `supabase/migrations/` con el nú
 | --- | --- |
 | `0001_inicio.sql` | Barberías, equipo, servicios, horarios, clientes, citas y trabajos |
 | `0002_clientes_trabajos_reservas.sql` | Tipo de cabello del cliente, confirmación de trabajos por la clienta, reservas desde la página pública y medallas |
+| `0003_equipo_con_cuentas.sql` | Barberos con cuenta propia: solicitud para unirse a la barbería y permisos (el encargado cambia precios y horarios; el barbero, solo su perfil) |
 
 Si la app muestra listas vacías o la página pública sin trabajos después de una actualización, lo más probable es que falte correr el archivo nuevo.
 
@@ -137,3 +138,13 @@ La plata significa que alguien de Nura visitó el local. Solo tú puedes marcarl
 3. Toca **Save**. La medalla cambia sola en la app.
 
 La columna **identidad_verificada_en** es para oro y queda para cuando se conecte la validación con INE.
+
+## Correo de recuperar contraseña
+
+Funciona con lo que ya configuraste en el paso 5. El correo que manda Supabase de fábrica está en inglés; para ponerlo en español entra a **Authentication**, **Emails**, **Reset Password** y cambia el asunto a `Recupera tu contraseña de Nura` y el texto a:
+
+```
+Hola. Toca este enlace para poner una contraseña nueva en Nura:
+{{ .ConfirmationURL }}
+Si no lo pediste, ignora este correo.
+```

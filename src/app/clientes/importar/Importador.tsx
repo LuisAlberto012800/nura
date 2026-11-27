@@ -131,14 +131,11 @@ export function Importador() {
             <h2 id="columnas" className="etiqueta">Columnas</h2>
             <span className="meta">{archivo}</span>
           </div>
-          <span className="meta">Revisa que cada dato venga de la columna correcta.</span>
+          <span className="meta">Revisa que cada dato venga de la columna correcta. Solo el nombre es obligatorio.</span>
           <div className="mapa-columnas">
             {CAMPOS.map((c) => (
               <label key={c.clave} className="campo">
-                <span>
-                  {c.texto}
-                  {c.clave === "nombre" ? "" : " (opcional)"}
-                </span>
+                <span>{c.texto}</span>
                 <select value={columnas[c.clave]} onChange={(e) => setColumnas({ ...columnas, [c.clave]: Number(e.target.value) })}>
                   <option value={-1}>No tengo este dato</option>
                   {encabezados.map((h, i) => (
@@ -179,9 +176,9 @@ export function Importador() {
           {(resumen.sinNombre > 0 || resumen.repetidosArchivo > 0 || resumen.celularRaro > 0) && (
             <span className="meta">
               {[
-                resumen.sinNombre ? `${resumen.sinNombre} filas sin nombre se saltan` : null,
-                resumen.repetidosArchivo ? `${resumen.repetidosArchivo} celulares repetidos se guardan una vez` : null,
-                resumen.celularRaro ? `${resumen.celularRaro} celulares no tienen 10 dígitos y se guardan sin celular` : null,
+                resumen.sinNombre ? (resumen.sinNombre === 1 ? "1 fila sin nombre se salta" : `${resumen.sinNombre} filas sin nombre se saltan`) : null,
+                resumen.repetidosArchivo ? (resumen.repetidosArchivo === 1 ? "1 celular repetido se guarda una sola vez" : `${resumen.repetidosArchivo} celulares repetidos se guardan una sola vez`) : null,
+                resumen.celularRaro ? (resumen.celularRaro === 1 ? "1 celular no tiene 10 dígitos y ese cliente se guarda sin celular" : `${resumen.celularRaro} celulares no tienen 10 dígitos y esos clientes se guardan sin celular`) : null,
               ]
                 .filter(Boolean)
                 .join(". ")}
@@ -228,8 +225,8 @@ export function Importador() {
         <strong>{resultado.nuevos.toLocaleString("es-MX")} clientes nuevos</strong>
         <p>
           {[
-            resultado.repetidos ? `${resultado.repetidos} ya estaban en tu lista y no se repitieron` : null,
-            resultado.omitidos ? `${resultado.omitidos} filas se saltaron` : null,
+            resultado.repetidos ? (resultado.repetidos === 1 ? "1 ya estaba en tu lista y no se repitió" : `${resultado.repetidos} ya estaban en tu lista y no se repitieron`) : null,
+            resultado.omitidos ? (resultado.omitidos === 1 ? "1 fila se saltó" : `${resultado.omitidos} filas se saltaron`) : null,
           ]
             .filter(Boolean)
             .join(". ") || "Todos quedaron en tu lista como clientes previos."}
