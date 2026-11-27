@@ -27,6 +27,7 @@ export function FormularioCita({
   servicios,
   clientes,
   ocupados,
+  clienteInicial,
 }: {
   dias: string[];
   hoy: string;
@@ -38,6 +39,7 @@ export function FormularioCita({
   servicios: Servicio[];
   clientes: Cliente[];
   ocupados: Ocupado[];
+  clienteInicial?: string;
 }) {
   const { estado, enviar, enviando } = useFormulario<EstadoAgenda>(crearCita, {});
   const [modo, setModo] = useState<"nuevo" | "existente">(clientes.length > 0 ? "existente" : "nuevo");
@@ -207,7 +209,7 @@ export function FormularioCita({
         {modo === "existente" ? (
           <label className="campo">
             <span>Elige al cliente</span>
-            <select id="cliente_id" name="cliente_id" defaultValue="">
+            <select id="cliente_id" name="cliente_id" defaultValue={clienteInicial ?? ""}>
               <option value="" disabled>
                 Selecciona…
               </option>

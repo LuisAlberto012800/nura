@@ -22,7 +22,7 @@ export default async function NuevaCita({ searchParams }: { searchParams: Promis
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect("/entrar");
+  if (!user) redirect("/");
   const salon = await salonDelUsuario(supabase, user.id);
   if (!salon) redirect("/alta");
 
@@ -101,6 +101,7 @@ export default async function NuevaCita({ searchParams }: { searchParams: Promis
             servicios={servicios}
             clientes={clientes ?? []}
             ocupados={ocupados}
+            clienteInicial={(clientes ?? []).find((c) => c.id === sp.cliente)?.id}
           />
         )}
       </div>

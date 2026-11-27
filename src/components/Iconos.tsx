@@ -14,6 +14,11 @@ const TRAZOS = {
   buscar: "M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM20 20l-4-4",
   usuario: "M12 12.3a3.8 3.8 0 1 0 0-7.6 3.8 3.8 0 0 0 0 7.6zM5 20c1.2-3.6 4-5.2 7-5.2s5.8 1.6 7 5.2",
   siguiente: "M9 5l7 7-7 7",
+  mas: "M12 5v14M5 12h14",
+  mensaje: "M4 5.5h16v11H9l-5 4z",
+  compartir: "M12 4v11M7.5 8.5L12 4l4.5 4.5M5 13v6h14v-6",
+  foto: "M4 5h16v14H4zM4 15l4.5-4.5 4 4 2.5-2.5L20 17M15.5 9.5a1 1 0 1 0 0-.01",
+  basura: "M5 7h14M10 7V4.5h4V7M7 7l1 13h8l1-13",
 } as const;
 
 export type NombreIcono = keyof typeof TRAZOS;

@@ -1,31 +1,34 @@
 import Link from "next/link";
-import { Icono } from "./Iconos";
+import { Icono, type NombreIcono } from "./Iconos";
 
-// Barra inferior de la barbería. Las pestañas que aún no existen se ven apagadas.
-export function BarraBarberia({ activa }: { activa: "hoy" | "agenda" }) {
+type Pestana = "hoy" | "agenda" | "subir" | "clientes" | "cuenta";
+
+const LADO_A: { clave: Pestana; texto: string; href: string; icono: NombreIcono }[] = [
+  { clave: "hoy", texto: "Hoy", href: "/hoy", icono: "hoy" },
+  { clave: "agenda", texto: "Agenda", href: "/agenda", icono: "agenda" },
+];
+const LADO_B: typeof LADO_A = [
+  { clave: "clientes", texto: "Clientes", href: "/clientes", icono: "clientes" },
+  { clave: "cuenta", texto: "Cuenta", href: "/cuenta", icono: "cuenta" },
+];
+
+// Barra inferior de la barbería. Al centro, el botón de subir trabajo.
+export function BarraBarberia({ activa }: { activa: Pestana }) {
+  const enlace = (p: (typeof LADO_A)[number]) => (
+    <Link key={p.clave} href={p.href} className={activa === p.clave ? "activa" : undefined} aria-current={activa === p.clave ? "page" : undefined}>
+      <Icono nombre={p.icono} />
+      {p.texto}
+    </Link>
+  );
   return (
     <nav className="barra" aria-label="Secciones">
-      <Link href="/hoy" className={activa === "hoy" ? "activa" : undefined} aria-current={activa === "hoy" ? "page" : undefined}>
-        <Icono nombre="hoy" />
-        Hoy
-      </Link>
-      <Link href="/agenda" className={activa === "agenda" ? "activa" : undefined} aria-current={activa === "agenda" ? "page" : undefined}>
-        <Icono nombre="agenda" />
-        Agenda
-      </Link>
-      <span className="pronto" title="Próximamente" aria-label="Subir trabajo, próximamente">
+      {LADO_A.map(enlace)}
+      <Link href="/subir" aria-label="Subir trabajo" aria-current={activa === "subir" ? "page" : undefined}>
         <span className="central">
           <Icono nombre="camara" tamano={24} />
         </span>
-      </span>
-      <span className="pronto" title="Próximamente">
-        <Icono nombre="clientes" />
-        Clientes
-      </span>
-      <span className="pronto" title="Próximamente">
-        <Icono nombre="cuenta" />
-        Cuenta
-      </span>
+      </Link>
+      {LADO_B.map(enlace)}
     </nav>
   );
 }
