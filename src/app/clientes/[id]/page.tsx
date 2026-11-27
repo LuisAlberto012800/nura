@@ -122,7 +122,7 @@ export default async function FichaCliente({ params }: { params: Promise<{ id: s
           <Link href={`/agenda/cita/${proxima.id}`} className="tarjeta proxima">
             <span className="etiqueta">Próxima cita</span>
             <strong>
-              {etiquetaDia(diaLocal(proxima.inicio)).corto} {fechaCorta(diaLocal(proxima.inicio))} · {horaLocal(proxima.inicio)}
+              {diaLocal(proxima.inicio) === hoy ? "Hoy" : `${etiquetaDia(diaLocal(proxima.inicio)).corto} ${fechaCorta(diaLocal(proxima.inicio))}`} · {horaLocal(proxima.inicio)}
             </strong>
             <span className="meta">
               {proxima.servicio?.nombre ?? "Cita"}

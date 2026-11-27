@@ -25,9 +25,9 @@ export function medallaTrabajo(salon: number, cliente: number | null, confirmaci
 }
 
 export const SIGUIENTE_PASO = [
-  "Agrega el WhatsApp de tu barbería en Cuenta.",
-  "El equipo de Nura visita tu local para darte plata.",
-  "Valida tu identidad con INE para llegar a oro. Pronto en la app.",
-  "Llega a 25 trabajos confirmados por clientas y 3 meses en Nura.",
+  "Agrega el WhatsApp de tu barbería en Datos de tu barbería.",
+  "El equipo de Nura visita tu local y lo confirma.",
+  "Validas tu identidad con tu INE. Muy pronto en la app.",
+  "Llegas a 25 trabajos confirmados por clientes y 3 meses en Nura.",
   "Tienes la medalla más alta.",
 ] as const;

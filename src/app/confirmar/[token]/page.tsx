@@ -62,7 +62,7 @@ export default async function Confirmar({ params }: { params: Promise<{ token: s
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               <Boton respuesta="con_nombre" texto={t.cliente ? `Confirmar como ${t.cliente}` : "Confirmar con mi nombre"} clase="btn" />
               <Boton respuesta="sin_nombre" texto="Confirmar sin mi nombre" clase="btn btn-sec" />
-              <Boton respuesta="rechazado" texto="No soy yo o no quiero que se publique" clase="btn btn-texto" />
+              <Boton respuesta="rechazado" texto="No soy yo o no quiero que se publique" clase="btn btn-texto ancho" />
             </div>
           </>
         ) : t.confirmacion === "rechazado" ? (

@@ -555,3 +555,7 @@ a.tarjeta-trabajo { display: block; color: inherit; text-decoration: none; }
   background: var(--superficie-200); color: var(--tinta-400);
 }
 .paso.hecho { background: var(--exito-500); color: #fff; }
+.fila-cliente .servicio-info strong { color: var(--tinta-900); }
+.accion-fija { margin-top: auto; }
+.foto-confirmar { max-height: 46vh; }
+.btn-texto.ancho { width: 100%; }

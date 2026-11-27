@@ -84,7 +84,7 @@ export default async function Cuenta() {
             <Medalla nivel={nivel} />
           </div>
           <p style={{ margin: 0, fontSize: 14, color: "var(--tinta-600)" }}>
-            {nivel < 4 ? `Para ${NOMBRE_MEDALLA[nivel + 1].toLowerCase()}: ${SIGUIENTE_PASO[nivel].charAt(0).toLowerCase()}${SIGUIENTE_PASO[nivel].slice(1)}` : SIGUIENTE_PASO[4]}
+            {nivel < 4 ? `Siguiente, ${NOMBRE_MEDALLA[nivel + 1].toLowerCase()}: ${SIGUIENTE_PASO[nivel]}` : SIGUIENTE_PASO[4]}
           </p>
           <span className="meta">Cada trabajo lleva la medalla más baja entre la tuya y la de tu cliente.</span>
         </section>

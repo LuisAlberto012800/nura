@@ -22,6 +22,17 @@ Guía para conectar Supabase y Vercel la primera vez. Toma unos 30 minutos y tod
 
 Este archivo se corre una sola vez.
 
+### Actualizaciones de la base de datos
+
+Cuando la app crece, llega un archivo nuevo en `supabase/migrations/` con el número siguiente (`0002_…`, `0003_…`). Cada uno se corre **una sola vez, en orden**, igual que el primero: **Raw**, copiar todo, **SQL Editor**, **New query**, pegar y **Run**.
+
+| Archivo | Qué agrega |
+| --- | --- |
+| `0001_inicio.sql` | Barberías, equipo, servicios, horarios, clientes, citas y trabajos |
+| `0002_clientes_trabajos_reservas.sql` | Tipo de cabello del cliente, confirmación de trabajos por la clienta, reservas desde la página pública y medallas |
+
+Si la app muestra listas vacías o la página pública sin trabajos después de una actualización, lo más probable es que falte correr el archivo nuevo.
+
 ## 3. Copiar las dos llaves
 
 Son dos datos que le dicen a la app **dónde** está tu base de datos y **con qué llave** puede entrar. Los copias de Supabase y los pegas en Vercel.
@@ -116,3 +127,13 @@ En Vercel, **Settings**, **Environment Variables**, agrega:
 | `NEXT_PUBLIC_LOGIN_PROVIDERS` | `google,facebook` (o solo `google`) |
 
 Luego **Deployments**, los tres puntos del último y **Redeploy**. Si enciendes un botón en la app antes de terminar su pantalla en Supabase, al tocarlo verás un aviso y nada se rompe.
+
+## Dar la medalla plata a una barbería
+
+La plata significa que alguien de Nura visitó el local. Solo tú puedes marcarla, la barbería no:
+
+1. En Supabase abre **Table Editor** y la tabla **salones**.
+2. Busca la barbería y en la columna **local_verificado_en** escribe la fecha de la visita, por ejemplo `2026-11-27`.
+3. Toca **Save**. La medalla cambia sola en la app.
+
+La columna **identidad_verificada_en** es para oro y queda para cuando se conecte la validación con INE.
