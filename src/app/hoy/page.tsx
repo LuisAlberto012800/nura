@@ -7,7 +7,17 @@ import { SinConfigurar } from "@/components/SinConfigurar";
 import { supabaseConfigurado } from "@/lib/supabase/config";
 import { crearClienteServidor } from "@/lib/supabase/server";
 import { salonDelUsuario } from "@/lib/salon";
+import { aInstante, horaLocal, hoyLocal, sumarDias } from "@/lib/tiempo";
 import { salir } from "./acciones";
+
+type CitaHoy = {
+  id: string;
+  inicio: string;
+  estado: string;
+  cliente: { nombre: string } | null;
+  servicio: { nombre: string } | null;
+  estilista: { nombre: string } | null;
+};
 
 export const metadata = { title: "Hoy · Nura" };
 export const dynamic = "force-dynamic";
@@ -48,6 +58,18 @@ export default async function Hoy() {
   ]);
   const primerNombre = (yo?.nombre ?? "").split(" ")[0];
 
+  const hoy = hoyLocal();
+  const { data: datosCitas } = await supabase
+    .from("citas")
+    .select("id, inicio, estado, cliente:clientes(nombre), servicio:servicios(nombre), estilista:estilistas(nombre)")
+    .eq("salon_id", salon.id)
+    .in("estado", ["confirmada", "por_confirmar", "completada"])
+    .gte("inicio", aInstante(hoy, "00:00"))
+    .lt("inicio", aInstante(sumarDias(hoy, 1), "00:00"))
+    .order("inicio");
+  const citasHoy = (datosCitas ?? []) as unknown as CitaHoy[];
+  const variosEstilistas = new Set(citasHoy.map((c) => c.estilista?.nombre)).size > 1;
+
   const pendientes: { hecho: boolean; texto: string; href?: string }[] = [
     { hecho: true, texto: "Datos de tu barbería" },
     { hecho: servicios > 0, texto: "Servicios y precios", href: "/servicios" },
@@ -74,6 +96,42 @@ export default async function Hoy() {
             {salon.colonia} · enlace de tu página: /{salon.slug}
           </span>
         </div>
+
+        <section className="tarjeta" aria-labelledby="citas-hoy">
+          <div className="fila-separada">
+            <h2 id="citas-hoy" className="etiqueta">Citas de hoy · {citasHoy.length}</h2>
+            <Link href="/agenda" className="meta" style={{ color: "var(--accion-500)", fontWeight: 700, textDecoration: "none" }}>
+              Ver agenda
+            </Link>
+          </div>
+          {citasHoy.length > 0 ? (
+            <ul className="lista-citas">
+              {citasHoy.map((c) => (
+                <li key={c.id}>
+                  <Link href={`/agenda/cita/${c.id}`}>
+                    <span className="hora" style={{ color: c.estado === "completada" ? "var(--tinta-400)" : undefined }}>
+                      {horaLocal(c.inicio)}
+                    </span>
+                    <span style={{ flex: 1, minWidth: 0 }}>
+                      <strong style={{ display: "block", fontSize: 14, color: c.estado === "completada" ? "var(--tinta-400)" : undefined }}>
+                        {c.servicio?.nombre ?? "Cita"} · {c.cliente?.nombre?.split(" ")[0] ?? "Sin cliente"}
+                      </strong>
+                      <span className="meta">
+                        {c.estado === "completada" ? "Completada" : c.estado === "por_confirmar" ? "Por confirmar" : "Confirmada"}
+                        {variosEstilistas && c.estilista ? ` · con ${c.estilista.nombre.split(" ")[0]}` : ""}
+                      </span>
+                    </span>
+                    <Icono nombre="siguiente" tamano={16} />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="meta" style={{ margin: 0 }}>
+              No tienes citas hoy. <Link href="/agenda/nueva">Agenda una</Link>.
+            </p>
+          )}
+        </section>
 
         <section className="tarjeta" aria-labelledby="pendientes">
           <div className="fila-separada">

@@ -219,6 +219,87 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .interruptor-check:checked { background: var(--accion-500); }
 .interruptor-check:checked::after { left: 21px; }
 
+/* ---------- Agenda ---------- */
+.aviso-exito { background: color-mix(in srgb, var(--exito-500) 14%, transparent); color: var(--exito-500); }
+
+.boton-icono {
+  width: 40px; height: 40px; border-radius: var(--radio-pill);
+  border: 1px solid var(--borde-100); background: var(--superficie-000);
+  display: inline-flex; align-items: center; justify-content: center; color: var(--tinta-900);
+}
+
+.tira-dias {
+  display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px;
+  padding: 5px; border-radius: 18px; background: var(--superficie-000); border: 1px solid var(--borde-100);
+}
+.dia-chip {
+  display: flex; flex-direction: column; align-items: center; gap: 1px;
+  padding: 7px 0; border-radius: 13px; color: var(--tinta-600); text-decoration: none;
+}
+.dia-chip span { font-size: 11px; font-weight: 600; }
+.dia-chip strong { font-size: 16px; font-weight: 800; color: var(--tinta-900); }
+.dia-chip.activo { background: var(--azul-500); color: #fff; }
+.dia-chip.activo strong { color: #fff; }
+
+.chips-equipo { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; }
+.chip {
+  flex: none; min-height: 36px; padding: 0 14px; border-radius: var(--radio-pill);
+  border: 1px solid var(--borde-200); color: var(--tinta-600);
+  display: inline-flex; align-items: center; font-size: 13px; font-weight: 600; text-decoration: none;
+}
+.chip.activo { border-color: var(--accion-500); background: var(--accion-100); color: var(--accion-700); font-weight: 800; }
+
+.segmentado { display: flex; padding: 3px; border-radius: 13px; background: var(--superficie-200); }
+.segmentado button {
+  flex: 1; min-height: 38px; border: 0; border-radius: 10px; background: transparent;
+  font-size: 14px; font-weight: 600; color: var(--tinta-600); cursor: pointer;
+}
+.segmentado button[aria-pressed="true"] { background: var(--superficie-000); color: var(--tinta-900); font-weight: 800; box-shadow: 0 1px 3px rgba(29, 21, 17, 0.15); }
+
+.linea-tiempo { position: relative; }
+.franja {
+  position: absolute; left: 0; right: 0;
+  display: flex; border-top: 1px dashed var(--borde-100); text-decoration: none;
+}
+.franja.en-punto { border-top-style: solid; }
+.franja span { width: 52px; padding-top: 3px; font-size: 12px; color: var(--tinta-400); font-variant-numeric: tabular-nums; }
+.franja:hover, .franja:focus-visible { background: color-mix(in srgb, var(--azul-500) 7%, transparent); }
+.franja.fuera { background: repeating-linear-gradient(135deg, transparent 0 10px, color-mix(in srgb, var(--borde-100) 45%, transparent) 10px 12px); }
+
+.bloque {
+  position: absolute; left: 58px; right: 0; z-index: 1;
+  border-radius: 12px; padding: 6px 10px; overflow: hidden;
+  display: flex; flex-direction: column; gap: 1px; text-decoration: none;
+}
+.bloque strong { font-size: 13px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bloque span { font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cita { background: var(--accion-100); box-shadow: inset 4px 0 0 var(--accion-500); color: var(--accion-700); }
+.cita span { color: var(--tinta-600); }
+.cita.por_confirmar { background: var(--azul-100); box-shadow: inset 4px 0 0 var(--azul-500); color: var(--azul-700); }
+.cita.completada { background: color-mix(in srgb, var(--exito-500) 14%, var(--superficie-000)); box-shadow: inset 4px 0 0 var(--exito-500); color: var(--exito-500); }
+.cita.no_asistio { background: var(--superficie-200); box-shadow: inset 4px 0 0 var(--borde-200); color: var(--tinta-400); }
+.bloqueo {
+  flex-direction: row; align-items: flex-start; justify-content: space-between; gap: 8px;
+  background: repeating-linear-gradient(135deg, var(--superficie-200) 0 8px, var(--borde-100) 8px 16px);
+  color: var(--tinta-600);
+}
+.bloqueo > div { display: flex; flex-direction: column; min-width: 0; }
+.bloqueo button {
+  flex: none; border: 0; border-radius: 8px; padding: 4px 8px;
+  background: var(--superficie-000); color: var(--tinta-600); font-size: 12px; font-weight: 700; cursor: pointer;
+}
+
+.aviso-deshacer {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 12px 14px 12px 16px; border-radius: 16px; background: var(--tinta-900); color: var(--superficie-100); font-size: 14px;
+}
+.aviso-deshacer button { border: 0; background: transparent; color: var(--accion-500); font-weight: 800; font-size: 14px; cursor: pointer; }
+
+.lista-citas { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; }
+.lista-citas li a { display: flex; align-items: center; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--borde-100); color: inherit; text-decoration: none; }
+.lista-citas li:last-child a { border-bottom: 0; }
+.lista-citas .hora { width: 50px; font-size: 15px; font-weight: 800; font-variant-numeric: tabular-nums; }
+
 .pendiente-enlace { flex: 1; display: flex; align-items: center; justify-content: space-between; gap: 8px; color: inherit; text-decoration: none; }
 
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }

@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState, useState, useTransition, type FormEvent } from "react";
+import { useState } from "react";
+import { useFormulario } from "@/lib/useFormulario";
 import { DIAS, HORAS, type DiaHorario } from "@/lib/horarios";
 import { guardarEstilista, type EstadoEquipo } from "./acciones";
 
@@ -15,18 +16,8 @@ export function FormularioEstilista({
   horario: DiaHorario[];
   esSugerido: boolean;
 }) {
-  const [estado, accion, guardando] = useActionState<EstadoEquipo, FormData>(guardarEstilista, {});
-  const [enTransicion, iniciar] = useTransition();
-  const enviando = guardando || enTransicion;
+  const { estado, enviar, enviando } = useFormulario<EstadoEquipo>(guardarEstilista, {});
   const [dias, setDias] = useState(horario);
-
-  // Se envía a mano para que React no reinicie el formulario al terminar:
-  // ese reinicio regresaba los interruptores a como estaban al abrir la pantalla.
-  const enviar = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const datos = new FormData(e.currentTarget);
-    iniciar(() => accion(datos));
-  };
 
   const cambiar = (dia: number, cambio: Partial<DiaHorario>) =>
     setDias((actual) => actual.map((d) => (d.dia === dia ? { ...d, ...cambio } : d)));

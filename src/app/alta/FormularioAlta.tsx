@@ -1,12 +1,12 @@
 "use client";
 
-import { useActionState } from "react";
+import { useFormulario } from "@/lib/useFormulario";
 import { darDeAlta, type EstadoAlta } from "./acciones";
 
 export function FormularioAlta() {
-  const [estado, accion, enviando] = useActionState<EstadoAlta, FormData>(darDeAlta, {});
+  const { estado, enviar, enviando } = useFormulario<EstadoAlta>(darDeAlta, {});
   return (
-    <form action={accion} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+    <form onSubmit={enviar} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
       <label className="campo">
         <span>Nombre de tu barbería o estética</span>
         <input id="nombre" name="nombre" autoComplete="organization" placeholder="Salón Alba" required />

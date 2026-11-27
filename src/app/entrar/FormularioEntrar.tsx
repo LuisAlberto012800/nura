@@ -1,14 +1,15 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useFormulario } from "@/lib/useFormulario";
+import { useState } from "react";
 import { entrarOCrear, type EstadoEntrar } from "./acciones";
 
 export function FormularioEntrar() {
   const [modo, setModo] = useState<"entrar" | "crear">("crear");
-  const [estado, accion, enviando] = useActionState<EstadoEntrar, FormData>(entrarOCrear, {});
+  const { estado, enviar, enviando } = useFormulario<EstadoEntrar>(entrarOCrear, {});
 
   return (
-    <form action={accion} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+    <form onSubmit={enviar} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
       <input type="hidden" name="modo" value={modo} />
       <label className="campo">
         <span>Correo</span>

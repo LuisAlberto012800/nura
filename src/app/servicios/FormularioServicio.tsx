@@ -1,13 +1,14 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
+import { useFormulario } from "@/lib/useFormulario";
+import { useEffect, useRef } from "react";
 import { CATEGORIAS, DURACIONES, duracionTexto } from "@/lib/formato";
 import { guardarServicio, type EstadoServicio } from "./acciones";
 
 type Inicial = { id: string; nombre: string; categoria: string; duracion_min: number; precio: number };
 
 export function FormularioServicio({ inicial }: { inicial?: Inicial }) {
-  const [estado, accion, enviando] = useActionState<EstadoServicio, FormData>(guardarServicio, {});
+  const { estado, enviar, enviando } = useFormulario<EstadoServicio>(guardarServicio, {});
   const formRef = useRef<HTMLFormElement>(null);
 
   // Al agregar uno nuevo, limpia el formulario para el siguiente.
@@ -16,7 +17,7 @@ export function FormularioServicio({ inicial }: { inicial?: Inicial }) {
   }, [estado, inicial]);
 
   return (
-    <form ref={formRef} action={accion} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+    <form ref={formRef} onSubmit={enviar} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
       {inicial && <input type="hidden" name="id" value={inicial.id} />}
       <label className="campo">
         <span>Nombre del servicio</span>
