@@ -6,6 +6,7 @@ import { SinConfigurar } from "@/components/SinConfigurar";
 import { supabaseConfigurado } from "@/lib/supabase/config";
 import { contextoBarberia } from "@/lib/sesion";
 import { pesos } from "@/lib/formato";
+import { insightsActivo } from "@/lib/insights";
 import { aInstante, diaLocal, diaSemana, etiquetaDia, fechaLarga, horaLocal, hoyLocal, sumarDias } from "@/lib/tiempo";
 import { cambiarEstado } from "../agenda/acciones";
 
@@ -80,6 +81,8 @@ export default async function Hoy() {
     supabase.from("clientes").select("id", { count: "exact", head: true }).eq("salon_id", salon.id).gte("creado_en", aInstante(lunes, "00:00")),
   ]);
   const semana = (dSemana ?? []) as { precio: number | null }[];
+  // Dinero y clientes nuevos: solo el encargado y solo con Nura Insights.
+  const conInsights = salon.rol === "dueno" && (await insightsActivo(supabase, salon.id));
   const cobradoSemana = semana.reduce((t, c) => t + (c.precio ?? 0), 0);
   const [servicios, horarios, trabajos] = conteos;
   const citasHoy = (datosHoy ?? []) as unknown as Cita[];
@@ -171,10 +174,12 @@ export default async function Hoy() {
               <strong>{citasHoy.length}</strong>
               <span>{citasHoy.length === 1 ? "cita hoy" : "citas hoy"}</span>
             </div>
-            <div>
-              <strong>{pesos(cobrado)}</strong>
-              <span>de {pesos(esperado)}</span>
-            </div>
+            {conInsights && (
+              <div>
+                <strong>{pesos(cobrado)}</strong>
+                <span>de {pesos(esperado)}</span>
+              </div>
+            )}
             <div>
               <strong>{siguiente ? horaLocal(siguiente.inicio) : "—"}</strong>
               <span>{siguiente ? "la siguiente" : "sin más citas"}</span>
@@ -196,9 +201,12 @@ export default async function Hoy() {
           )}
         </section>
 
-        {(semana.length > 0 || (nuevos ?? 0) > 0) && (
-          <section aria-labelledby="semana" style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            <h2 id="semana" className="etiqueta">Esta semana</h2>
+        {conInsights ? (
+          <Link href="/negocio" className="tarjeta-enlace" aria-label="Ver los números de tu negocio">
+            <div className="fila-separada">
+              <h2 className="etiqueta">Esta semana</h2>
+              <span className="meta" style={{ color: "var(--accion-500)", fontWeight: 700 }}>Ver Negocio</span>
+            </div>
             <div className="estadisticas">
               <div>
                 <strong>{semana.length}</strong>
@@ -213,8 +221,16 @@ export default async function Hoy() {
                 <span>{nuevos === 1 ? "cliente nuevo" : "clientes nuevos"}</span>
               </div>
             </div>
-          </section>
-        )}
+          </Link>
+        ) : salon.rol === "dueno" && listos === pendientes.length ? (
+          <Link href="/negocio" className="tarjeta enlace-unirme">
+            <span>
+              <strong>¿Cuánto cobraste esta semana?</strong>
+              <span className="meta">Con Nura Insights ves tu dinero y qué clientes regresan.</span>
+            </span>
+            <Icono nombre="siguiente" tamano={18} />
+          </Link>
+        ) : null}
 
         {salon.rol === "dueno" && listos < pendientes.length && (
           <section className="tarjeta" aria-labelledby="pendientes">

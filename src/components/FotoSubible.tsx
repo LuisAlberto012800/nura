@@ -55,7 +55,7 @@ export function FotoSubible({
   };
 
   return (
-    <div className={`foto-subible ${forma}`}>
+    <div className={`foto-subible ${forma === "portada" ? "banda" : "circulo"}`}>
       <button type="button" className="foto-subible-boton" onClick={() => entrada.current?.click()} disabled={subiendo} aria-label={foto ? "Cambiar foto" : "Agregar foto"}>
         {foto ? (
           // eslint-disable-next-line @next/next/no-img-element

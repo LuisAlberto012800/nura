@@ -741,10 +741,26 @@ button.bloque { border: 0; text-align: left; font: inherit; cursor: pointer; ali
 .foto-subible.circulo .foto-subible-boton { width: 96px; height: 96px; border-radius: 999px; }
 .foto-subible.circulo .foto-subible-boton img { border-radius: 999px; }
 .foto-subible.circulo .inicial { display: flex; width: 100%; height: 100%; align-items: center; justify-content: center; border-radius: 999px; background: var(--accion-100); color: var(--accion-700); font-size: 36px; font-weight: 800; }
-.foto-subible.portada .foto-subible-boton { width: 100%; aspect-ratio: 16 / 7; border-radius: 20px; overflow: hidden; }
-.foto-subible.portada .vacia { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; height: 100%; font-size: 14px; font-weight: 700; border: 1.5px dashed var(--borde-200); border-radius: 20px; box-sizing: border-box; }
+.foto-subible.banda .foto-subible-boton { width: 100%; aspect-ratio: 16 / 7; border-radius: 20px; overflow: hidden; }
+.foto-subible.banda .vacia { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; height: 100%; font-size: 14px; font-weight: 700; border: 1.5px dashed var(--borde-200); border-radius: 20px; box-sizing: border-box; }
 .insignia-camara { position: absolute; right: 2px; bottom: 2px; width: 32px; height: 32px; border-radius: 999px; background: var(--accion-500); color: #fff; display: flex; align-items: center; justify-content: center; border: 3px solid var(--superficie-100); }
-.foto-subible.portada .insignia-camara { right: 10px; bottom: 10px; }
+.foto-subible.banda .insignia-camara { right: 10px; bottom: 10px; }
 .cargando { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(29,21,17,0.5); color: #fff; font-size: 13px; font-weight: 700; border-radius: inherit; }
 .avatar-foto { flex: none; width: 40px; height: 40px; border-radius: 999px; overflow: hidden; background: var(--superficie-200); }
 .avatar-foto img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* ---------- Negocio ---------- */
+.cifras-grandes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.cifras-grandes div { display: flex; flex-direction: column; gap: 2px; padding: 14px; border-radius: 20px; background: var(--superficie-000); border: 1px solid var(--borde-100); min-width: 0; }
+.cifras-grandes span { font-size: 12px; color: var(--tinta-400); font-weight: 700; }
+.cifras-grandes strong { font-size: 24px; font-weight: 800; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.cifras-grandes small { font-size: 12px; color: var(--tinta-400); }
+.barras { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 12px; }
+.barras li { display: flex; flex-direction: column; gap: 6px; font-size: 14px; }
+.barras strong { font-variant-numeric: tabular-nums; }
+.barra-valor { display: block; height: 8px; border-radius: 999px; background: var(--azul-500); min-width: 4px; }
+.lista-incluye { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.lista-incluye li { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; }
+.tarjeta-enlace { display: flex; flex-direction: column; gap: 8px; color: inherit; text-decoration: none; }
+.foto-subible-boton img { position: absolute; inset: 0; }
+.foto-subible.banda .foto-subible-boton { display: block; }

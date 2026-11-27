@@ -31,6 +31,7 @@ Cuando la app crece, llega un archivo nuevo en `supabase/migrations/` con el nú
 | `0001_inicio.sql` | Barberías, equipo, servicios, horarios, clientes, citas y trabajos |
 | `0002_clientes_trabajos_reservas.sql` | Tipo de cabello del cliente, confirmación de trabajos por la clienta, reservas desde la página pública y medallas |
 | `0003_equipo_con_cuentas.sql` | Barberos con cuenta propia: solicitud para unirse a la barbería y permisos (el encargado cambia precios y horarios; el barbero, solo su perfil) |
+| `0004_fotos_e_insights.sql` | Foto de perfil del barbero, portada de la barbería y la fecha de Nura Insights |
 
 Si la app muestra listas vacías o la página pública sin trabajos después de una actualización, lo más probable es que falte correr el archivo nuevo.
 
@@ -148,3 +149,13 @@ Hola. Toca este enlace para poner una contraseña nueva en Nura:
 {{ .ConfirmationURL }}
 Si no lo pediste, ignora este correo.
 ```
+
+## Activar Nura Insights a una barbería
+
+Nura Insights ($149 al mes) muestra al encargado lo cobrado, lo que tiene por cobrar, los clientes nuevos, los que regresan y los que no han regresado. Solo tú lo activas:
+
+1. En Supabase abre **Table Editor**, tabla **salones**.
+2. En la columna **insights_hasta** escribe la fecha hasta la que pagó, por ejemplo `2026-12-31`.
+3. Toca **Save**. Al día siguiente de esa fecha se apaga solo.
+
+Para que el botón "Quiero activarlo" abra un WhatsApp contigo, agrega en Vercel (Settings, Environment Variables) la llave `NEXT_PUBLIC_NURA_WHATSAPP` con tu número de 10 dígitos y haz **Redeploy**. Sin ella, la pantalla dice que se lo pidan al equipo de Nura.
