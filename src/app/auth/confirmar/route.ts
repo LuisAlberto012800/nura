@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { NextResponse, type NextRequest } from "next/server";
 import { crearClienteServidor } from "@/lib/supabase/server";
-import { COOKIE_ROL, esRol } from "@/lib/rol";
+import { COOKIE_RECUPERAR, COOKIE_ROL, esRol } from "@/lib/rol";
 
 // Aquí regresa la persona después de confirmar su correo o de entrar con
 // Google o Facebook. Si eligió un rol al registrarse, se guarda en su cuenta.
@@ -21,5 +21,12 @@ export async function GET(request: NextRequest) {
   }
   almacen.delete(COOKIE_ROL);
 
+  // Si viene del correo de "recuperar contraseña", va directo a poner una nueva.
+  const enviado = data.user.recovery_sent_at ? Date.parse(data.user.recovery_sent_at) : 0;
+  const recuperando = almacen.get(COOKIE_RECUPERAR)?.value === "1" || (enviado > Date.now() - 60 * 60_000 && Date.parse(data.user.email_confirmed_at ?? "") < enviado);
+  if (recuperando) {
+    almacen.delete(COOKIE_RECUPERAR);
+    return NextResponse.redirect(`${origin}/nueva-contrasena`);
+  }
   return NextResponse.redirect(`${origin}/`);
 }

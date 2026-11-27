@@ -2,7 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { SUPABASE_ANON_KEY, SUPABASE_URL, supabaseConfigurado } from "@/lib/supabase/config";
 
-const RUTAS_PRIVADAS = ["/hoy", "/alta", "/servicios", "/equipo", "/agenda", "/api/respaldo", "/elegir", "/inicio", "/citas", "/tu", "/clientes", "/subir", "/trabajos", "/cuenta"];
+const RUTAS_PRIVADAS = ["/hoy", "/alta", "/servicios", "/equipo", "/agenda", "/api/respaldo", "/elegir", "/inicio", "/citas", "/tu", "/clientes", "/subir", "/trabajos", "/cuenta", "/nueva-contrasena"];
 
 // Mantiene viva la sesión y manda a "Entrar" a quien no tiene cuenta.
 export async function middleware(request: NextRequest) {

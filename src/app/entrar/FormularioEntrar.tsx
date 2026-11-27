@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useFormulario } from "@/lib/useFormulario";
 import type { Rol } from "@/lib/rol";
 import { entrarOCrear, type EstadoEntrar } from "./acciones";
@@ -28,6 +29,11 @@ export function FormularioEntrar({ modo, rol }: { modo: "entrar" | "crear"; rol?
         />
         {modo === "crear" && <small>Al menos 8 caracteres.</small>}
       </label>
+      {modo === "entrar" && (
+        <Link href="/recuperar" className="meta" style={{ alignSelf: "flex-end", marginTop: -6, color: "var(--accion-500)", fontWeight: 700, textDecoration: "none" }}>
+          ¿Olvidaste tu contraseña?
+        </Link>
+      )}
 
       {estado.error && <p className="aviso aviso-error" role="alert">{estado.error}</p>}
       {estado.aviso && <p className="aviso aviso-azul" role="status">{estado.aviso}</p>}

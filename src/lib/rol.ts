@@ -6,6 +6,7 @@ import { salonDelUsuario } from "./salon";
 // porque los datos de cada barbería los protegen las reglas de la base de datos.
 export type Rol = "cliente" | "profesional";
 export const COOKIE_ROL = "nura_rol";
+export const COOKIE_RECUPERAR = "nura_recuperar";
 
 export function esRol(valor: unknown): valor is Rol {
   return valor === "cliente" || valor === "profesional";
