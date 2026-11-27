@@ -4,7 +4,10 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { crearClienteServidor } from "@/lib/supabase/server";
 import { limpiarTelefono, salonDelUsuario } from "@/lib/salon";
-import { aInstante, aMinutos, deMinutos, esDiaValido } from "@/lib/tiempo";
+import { aInstante, aMinutos, deMinutos, diaSemana, esDiaValido, hoyLocal, minutosAhora } from "@/lib/tiempo";
+import { dentroDeTurno, textoTurnos, turnosDelDia, type Turno } from "@/lib/disponibilidad";
+
+const EN_PLURAL = ["los domingos", "los lunes", "los martes", "los miércoles", "los jueves", "los viernes", "los sábados"];
 
 export type EstadoAgenda = { error?: string };
 
@@ -42,8 +45,22 @@ export async function crearCita(_: EstadoAgenda, form: FormData): Promise<Estado
   if (!esDiaValido(dia) || !HORA.test(hora)) return { error: "Elige el día y la hora." };
   if (!estilistaId) return { error: "Elige quién atiende." };
   if (!servicioId) return { error: "Elige el servicio." };
+  if (dia < hoyLocal()) return { error: "Ese día ya pasó. Elige hoy o un día próximo." };
+  if (dia === hoyLocal() && aMinutos(hora) < minutosAhora() - 30) return { error: "Esa hora ya pasó. Elige una hora más tarde." };
 
   const { supabase, salon } = await contexto();
+
+  const { data: estilista } = await supabase
+    .from("estilistas")
+    .select("nombre, horarios(dia, inicio, fin)")
+    .eq("id", estilistaId)
+    .eq("salon_id", salon.id)
+    .eq("activo", true)
+    .maybeSingle();
+  if (!estilista) return { error: "Esa persona ya no está en tu equipo. Elige a otra." };
+  const nombreCorto = estilista.nombre.split(" ")[0];
+  const turnos = turnosDelDia((estilista.horarios ?? []) as Turno[], dia);
+  if (turnos.length === 0) return { error: `${nombreCorto} descansa ${EN_PLURAL[diaSemana(dia)]}. Elige otro día o cambia quién atiende.` };
 
   const { data: servicio } = await supabase
     .from("servicios")
@@ -53,9 +70,11 @@ export async function crearCita(_: EstadoAgenda, form: FormData): Promise<Estado
     .maybeSingle();
   if (!servicio) return { error: "Ese servicio ya no existe. Elige otro." };
 
+  if (!dentroDeTurno(turnos, hora, servicio.duracion_min)) {
+    return { error: `La cita quedaría fuera del horario de ${nombreCorto}, que ese día atiende de ${textoTurnos(turnos)}. Elige otra hora.` };
+  }
   const inicio = aInstante(dia, hora);
   const fin = aInstante(dia, deMinutos(aMinutos(hora) + servicio.duracion_min));
-  if (aMinutos(hora) + servicio.duracion_min > 24 * 60) return { error: "La cita terminaría después de medianoche. Elige una hora más temprana." };
 
   const { data: choque } = await supabase
     .from("bloqueos")

@@ -123,6 +123,9 @@ export default async function Agenda({ searchParams }: { searchParams: Promise<R
   const y = (m: number) => ((m - inicioVista) / 30) * ALTO_MEDIA_HORA;
 
   const dias = Array.from({ length: 7 }, (_, i) => sumarDias(hoy, i));
+  // Los días pasados se pueden consultar, pero no agendar.
+  const pasado = dia < hoy;
+  const diaParaAgendar = pasado ? hoy : dia;
   const consulta = (d: string) => `/agenda?dia=${d}&e=${estilista.id}`;
   const citaCancelada = sp.cancelada;
 
@@ -166,6 +169,15 @@ export default async function Agenda({ searchParams }: { searchParams: Promise<R
           </nav>
         )}
 
+        <div className="fila acciones-agenda" style={{ gap: 10 }}>
+          <Link className="btn" href={`/agenda/nueva?dia=${diaParaAgendar}&e=${estilista.id}`}>
+            Nueva cita
+          </Link>
+          <Link className="btn btn-sec" href={`/agenda/bloquear?dia=${dia}&e=${estilista.id}`}>
+            Bloquear horario
+          </Link>
+        </div>
+
         {citaCancelada && (
           <form action={cambiarEstado} className="aviso-deshacer" role="status">
             <span>Cita cancelada.</span>
@@ -179,23 +191,36 @@ export default async function Agenda({ searchParams }: { searchParams: Promise<R
         )}
 
         <p className="meta" style={{ margin: 0 }}>
-          {horario
+          {pasado
+            ? "Este día ya pasó. Puedes consultarlo, pero las citas nuevas son de hoy en adelante."
+            : horario
             ? `${estilista.nombre.split(" ")[0]} atiende de ${horario.inicio.slice(0, 5)} a ${horario.fin.slice(0, 5)}. Toca una hora libre para agendar.`
-            : `${estilista.nombre.split(" ")[0]} descansa este día. Aun así puedes agendar si lo necesitas.`}
+            : `${estilista.nombre.split(" ")[0]} descansa este día. No se pueden agendar citas.`}
         </p>
 
         <div className="linea-tiempo" style={{ height: franjas.length * ALTO_MEDIA_HORA }}>
-          {franjas.map((m) => (
-            <Link
-              key={m}
-              href={`/agenda/nueva?dia=${dia}&e=${estilista.id}&hora=${deMinutos(m)}`}
-              className={`franja${m % 60 === 0 ? " en-punto" : ""}${dentroDeHorario(m) ? "" : " fuera"}`}
-              style={{ top: y(m), height: ALTO_MEDIA_HORA }}
-              aria-label={`Agendar a las ${deMinutos(m)}`}
-            >
-              <span>{m % 60 === 0 ? deMinutos(m) : ""}</span>
-            </Link>
-          ))}
+          {franjas.map((m) =>
+            dentroDeHorario(m) && !pasado ? (
+              <Link
+                key={m}
+                href={`/agenda/nueva?dia=${dia}&e=${estilista.id}&hora=${deMinutos(m)}`}
+                className={`franja${m % 60 === 0 ? " en-punto" : ""}`}
+                style={{ top: y(m), height: ALTO_MEDIA_HORA }}
+                aria-label={`Agendar a las ${deMinutos(m)}`}
+              >
+                <span>{m % 60 === 0 ? deMinutos(m) : ""}</span>
+              </Link>
+            ) : (
+              <div
+                key={m}
+                className={`franja${m % 60 === 0 ? " en-punto" : ""}${dentroDeHorario(m) ? "" : " fuera"}`}
+                style={{ top: y(m), height: ALTO_MEDIA_HORA }}
+                aria-hidden="true"
+              >
+                <span>{m % 60 === 0 ? deMinutos(m) : ""}</span>
+              </div>
+            ),
+          )}
 
           {bloqueos.map((b) => {
             const a = Math.max(inicioVista, minutosDe(b.inicio));
@@ -240,14 +265,6 @@ export default async function Agenda({ searchParams }: { searchParams: Promise<R
           })}
         </div>
 
-        <div className="fila" style={{ gap: 10 }}>
-          <Link className="btn" href={`/agenda/nueva?dia=${dia}&e=${estilista.id}`}>
-            Nueva cita
-          </Link>
-          <Link className="btn btn-sec" href={`/agenda/bloquear?dia=${dia}&e=${estilista.id}`}>
-            Bloquear horario
-          </Link>
-        </div>
       </div>
       <BarraBarberia activa="agenda" />
     </main>

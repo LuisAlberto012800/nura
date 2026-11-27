@@ -6,11 +6,14 @@ import { supabaseConfigurado } from "@/lib/supabase/config";
 import { crearClienteServidor } from "@/lib/supabase/server";
 import { salonDelUsuario } from "@/lib/salon";
 import { HORAS } from "@/lib/horarios";
-import { esDiaValido, fechaLarga, hoyLocal } from "@/lib/tiempo";
+import { aInstante, esDiaValido, hoyLocal, minutosAhora, sumarDias } from "@/lib/tiempo";
+import type { Ocupado } from "@/lib/disponibilidad";
 import { FormularioCita } from "./FormularioCita";
 
 export const metadata = { title: "Nueva cita · Nura" };
 export const dynamic = "force-dynamic";
+
+const DIAS_VISIBLES = 60;
 
 export default async function NuevaCita({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
   if (!supabaseConfigurado) return <SinConfigurar />;
@@ -23,11 +26,21 @@ export default async function NuevaCita({ searchParams }: { searchParams: Promis
   const salon = await salonDelUsuario(supabase, user.id);
   if (!salon) redirect("/alta");
 
-  const dia = esDiaValido(sp.dia) ? sp.dia : hoyLocal();
-  const hora = sp.hora && HORAS.includes(sp.hora) ? sp.hora : "10:00";
+  // Se puede agendar de hoy a 60 días; nunca en días pasados.
+  const hoy = hoyLocal();
+  const dias = Array.from({ length: DIAS_VISIBLES }, (_, i) => sumarDias(hoy, i));
+  const dia = esDiaValido(sp.dia) && dias.includes(sp.dia) ? sp.dia : hoy;
+  const hora = sp.hora && HORAS.includes(sp.hora) ? sp.hora : undefined;
+  const desde = aInstante(hoy, "00:00");
+  const hasta = aInstante(sumarDias(hoy, DIAS_VISIBLES), "00:00");
 
-  const [{ data: equipo }, { data: servicios }, { data: clientes }] = await Promise.all([
-    supabase.from("estilistas").select("id, nombre").eq("salon_id", salon.id).eq("activo", true).order("creado_en"),
+  const [{ data: equipo }, { data: servicios }, { data: clientes }, { data: citas }, { data: bloqueos }] = await Promise.all([
+    supabase
+      .from("estilistas")
+      .select("id, nombre, horarios(dia, inicio, fin)")
+      .eq("salon_id", salon.id)
+      .eq("activo", true)
+      .order("creado_en"),
     supabase
       .from("servicios")
       .select("id, nombre, duracion_min, precio")
@@ -36,7 +49,17 @@ export default async function NuevaCita({ searchParams }: { searchParams: Promis
       .order("orden")
       .order("creado_en"),
     supabase.from("clientes").select("id, nombre, telefono").eq("salon_id", salon.id).order("nombre").limit(500),
+    supabase
+      .from("citas")
+      .select("estilista_id, inicio, fin")
+      .eq("salon_id", salon.id)
+      .in("estado", ["por_confirmar", "confirmada"])
+      .lt("inicio", hasta)
+      .gt("fin", desde)
+      .limit(3000),
+    supabase.from("bloqueos").select("estilista_id, inicio, fin").eq("salon_id", salon.id).lt("inicio", hasta).gt("fin", desde).limit(1000),
   ]);
+  const ocupados = [...(citas ?? []), ...(bloqueos ?? [])] as Ocupado[];
 
   const estilistaId = (equipo ?? []).find((e) => e.id === sp.e)?.id ?? equipo?.[0]?.id ?? "";
   const volver = `/agenda?dia=${dia}${estilistaId ? `&e=${estilistaId}` : ""}`;
@@ -50,7 +73,6 @@ export default async function NuevaCita({ searchParams }: { searchParams: Promis
         </Link>
         <div>
           <h1 className="titulo">Nueva cita</h1>
-          <p className="subtitulo">{fechaLarga(dia)}</p>
         </div>
 
         {!servicios || servicios.length === 0 ? (
@@ -69,13 +91,16 @@ export default async function NuevaCita({ searchParams }: { searchParams: Promis
           </>
         ) : (
           <FormularioCita
-            dia={dia}
-            hora={hora}
-            horas={HORAS}
-            estilistaId={estilistaId}
+            dias={dias}
+            hoy={hoy}
+            ahora={minutosAhora()}
+            diaInicial={dia}
+            horaInicial={hora}
+            estilistaInicial={estilistaId}
             equipo={equipo ?? []}
             servicios={servicios}
             clientes={clientes ?? []}
+            ocupados={ocupados}
           />
         )}
       </div>

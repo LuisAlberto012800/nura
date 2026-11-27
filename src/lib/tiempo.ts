@@ -63,3 +63,8 @@ export function aMinutos(hora: string): number {
 export function deMinutos(minutos: number): string {
   return `${String(Math.floor(minutos / 60)).padStart(2, "0")}:${String(minutos % 60).padStart(2, "0")}`;
 }
+
+// Minutos desde medianoche, ahora mismo en Guadalajara
+export function minutosAhora(): number {
+  return aMinutos(new Intl.DateTimeFormat("es-MX", { timeZone: ZONA, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date()));
+}

@@ -263,7 +263,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 }
 .franja.en-punto { border-top-style: solid; }
 .franja span { width: 52px; padding-top: 3px; font-size: 12px; color: var(--tinta-400); font-variant-numeric: tabular-nums; }
-.franja:hover, .franja:focus-visible { background: color-mix(in srgb, var(--azul-500) 7%, transparent); }
+a.franja:hover, a.franja:focus-visible { background: color-mix(in srgb, var(--azul-500) 7%, transparent); }
 .franja.fuera { background: repeating-linear-gradient(135deg, transparent 0 10px, color-mix(in srgb, var(--borde-100) 45%, transparent) 10px 12px); }
 
 .bloque {
@@ -407,3 +407,54 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .opcion-cabello span { font-size: 12px; color: var(--tinta-400); }
 .opcion-cabello.activo { border-color: var(--accion-500); background: var(--accion-100); }
 .opcion-cabello.activo strong { color: var(--accion-700); }
+
+/* ---------- Nueva cita ---------- */
+.tira-elegir {
+  display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; scroll-snap-type: x proximity;
+  margin: 0 -16px; padding: 2px 16px;
+}
+.tira-elegir::-webkit-scrollbar { display: none; }
+.tira-elegir .dia-chip {
+  flex: none; width: 56px; scroll-snap-align: center; cursor: pointer;
+  border: 1px solid var(--borde-100); background: var(--superficie-000); font: inherit;
+}
+.tira-elegir .dia-chip.activo { background: var(--azul-500); border-color: var(--azul-500); }
+.dia-chip small { font-size: 10px; font-weight: 700; min-height: 13px; color: var(--tinta-400); text-transform: lowercase; }
+.dia-chip.activo small { color: #fff; }
+.dia-chip.descansa { background: var(--superficie-200); border-style: dashed; opacity: 0.55; }
+.dia-chip.descansa strong { text-decoration: line-through; color: var(--tinta-400); }
+
+.horas-libres { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.hora-chip {
+  min-height: 44px; border-radius: var(--radio-sm); cursor: pointer;
+  border: 1px solid var(--borde-200); background: transparent; color: var(--tinta-900);
+  font: inherit; font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums;
+}
+.hora-chip.activo { border-color: var(--accion-500); background: var(--accion-500); color: #fff; }
+
+.accion-fija {
+  position: sticky; bottom: 0; z-index: 2;
+  margin: 0 -16px -28px; padding: 12px 16px calc(16px + env(safe-area-inset-bottom, 0px));
+  background: linear-gradient(180deg, transparent, var(--superficie-100) 30%);
+}
+
+.velo {
+  position: fixed; inset: 0; z-index: 50;
+  background: rgba(29, 21, 17, 0.5);
+  display: flex; align-items: flex-end; justify-content: center;
+  padding: 16px max(16px, env(safe-area-inset-left, 0px)) calc(16px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-right, 0px));
+  animation: aparecer .15s ease-out;
+}
+.ventana {
+  width: 100%; max-width: 440px; padding: 22px 20px 18px;
+  border-radius: var(--radio-lg); background: var(--superficie-000);
+  display: flex; flex-direction: column; gap: 10px;
+  box-shadow: 0 20px 40px -12px rgba(29, 21, 17, 0.45);
+  border-top: 3px solid var(--azul-500);
+  animation: subir-ventana .2s ease-out;
+}
+.ventana strong { font-size: 18px; }
+.ventana p { margin: 0 0 6px; color: var(--tinta-600); line-height: 1.5; }
+@keyframes aparecer { from { opacity: 0; } }
+@keyframes subir-ventana { from { transform: translateY(16px); opacity: 0; } }
+@media (min-width: 520px) { .velo { align-items: center; } }
