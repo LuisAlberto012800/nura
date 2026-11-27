@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { BarraClienta } from "@/components/BarraClienta";
-import { Icono } from "@/components/Iconos";
 import { Espejo, Logo } from "@/components/Logo";
 import { SinConfigurar } from "@/components/SinConfigurar";
 import { supabaseConfigurado } from "@/lib/supabase/config";
 import { crearClienteServidor } from "@/lib/supabase/server";
-import { CATEGORIAS } from "@/lib/formato";
+import { CATEGORIAS, pesos } from "@/lib/formato";
+import { Medalla } from "@/components/Medalla";
+import { medallaSalon, medallaTrabajo } from "@/lib/medallas";
 
 export const metadata = { title: "Descubrir · Nura" };
 export const dynamic = "force-dynamic";
@@ -26,7 +27,10 @@ type Trabajo = {
   tipo_cabello: string;
   categoria: string;
   colonia: string;
-  salon: { nombre: string; slug: string } | null;
+  confirmacion: string;
+  medalla_cliente: number | null;
+  servicio: { nombre: string; precio: number } | null;
+  salon: { nombre: string; slug: string; whatsapp: string | null; local_verificado_en: string | null; identidad_verificada_en: string | null } | null;
   estilista: { nombre: string } | null;
 };
 
@@ -48,7 +52,7 @@ export default async function Descubrir({ searchParams }: { searchParams: Promis
 
   let consulta = supabase
     .from("trabajos")
-    .select("id, titulo, foto_despues, foto_antes, tipo_cabello, categoria, colonia, salon:salones(nombre, slug), estilista:estilistas(nombre)")
+    .select("id, titulo, foto_despues, foto_antes, tipo_cabello, categoria, colonia, confirmacion, medalla_cliente, servicio:servicios(nombre, precio), salon:salones(nombre, slug, whatsapp, local_verificado_en, identidad_verificada_en), estilista:estilistas(nombre)")
     .eq("publicado", true)
     .order("creado_en", { ascending: false })
     .limit(40);
@@ -85,11 +89,6 @@ export default async function Descubrir({ searchParams }: { searchParams: Promis
           </span>
         </div>
 
-        <div className="busqueda" aria-disabled="true">
-          <Icono nombre="buscar" tamano={18} />
-          ¿Qué te quieres hacer?
-        </div>
-
         <nav className="chips-equipo" aria-label="Tipo de cabello">
           <Link href={enlace({ cabello: "todos" })} className={`chip${!cabello ? " activo" : ""}`}>
             Todos
@@ -124,20 +123,24 @@ export default async function Descubrir({ searchParams }: { searchParams: Promis
             {columnas.map((col, c) => (
               <div key={c} className="feed-col">
                 {col.map((t, i) => (
-                  <article key={t.id} className="tarjeta-trabajo">
+                  <Link key={t.id} href={t.salon ? `/b/${t.salon.slug}` : "#"} className="tarjeta-trabajo">
                     <div className="foto" style={{ height: ALTOS[(i * 2 + c) % ALTOS.length] }}>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={t.foto_despues} alt={t.titulo ?? "Trabajo"} loading="lazy" />
+                      <img src={t.foto_despues} alt={t.titulo ?? t.servicio?.nombre ?? "Trabajo"} loading="lazy" />
                       {t.foto_antes && <span className="sello">Antes / Después</span>}
                     </div>
                     <div className="cuerpo">
-                      <span className="autor">{t.estilista?.nombre ?? t.salon?.nombre}</span>
-                      <strong>{t.titulo ?? CATEGORIAS.find((x) => x.valor === t.categoria)?.texto}</strong>
+                      <span className="autor">{t.estilista ? `${t.estilista.nombre.split(" ")[0]} · ${t.salon?.nombre}` : t.salon?.nombre}</span>
+                      <div className="fila-separada" style={{ gap: 6, alignItems: "baseline" }}>
+                        <strong>{t.titulo ?? t.servicio?.nombre ?? CATEGORIAS.find((x) => x.valor === t.categoria)?.texto}</strong>
+                        {t.servicio && <span className="precio" style={{ fontSize: 14 }}>{pesos(t.servicio.precio)}</span>}
+                      </div>
                       <span className="meta">
                         {CABELLOS.find((x) => x.valor === t.tipo_cabello)?.texto} · {t.colonia}
                       </span>
+                      {t.salon && <Medalla nivel={medallaTrabajo(medallaSalon(t.salon), t.medalla_cliente, t.confirmacion)} compacta />}
                     </div>
-                  </article>
+                  </Link>
                 ))}
               </div>
             ))}
