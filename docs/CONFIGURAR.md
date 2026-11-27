@@ -32,6 +32,7 @@ Cuando la app crece, llega un archivo nuevo en `supabase/migrations/` con el nú
 | `0002_clientes_trabajos_reservas.sql` | Tipo de cabello del cliente, confirmación de trabajos por la clienta, reservas desde la página pública y medallas |
 | `0003_equipo_con_cuentas.sql` | Barberos con cuenta propia: solicitud para unirse a la barbería y permisos (el encargado cambia precios y horarios; el barbero, solo su perfil) |
 | `0004_fotos_e_insights.sql` | Foto de perfil del barbero, portada de la barbería y la fecha de Nura Insights |
+| `0005_bot_whatsapp.sql` | La fecha hasta la que cada barbería tiene pagado el bot de WhatsApp |
 
 Si la app muestra listas vacías o la página pública sin trabajos después de una actualización, lo más probable es que falte correr el archivo nuevo.
 
@@ -159,3 +160,44 @@ Nura Insights ($149 al mes) muestra al encargado lo cobrado, lo que tiene por co
 3. Toca **Save**. Al día siguiente de esa fecha se apaga solo.
 
 Para que el botón "Quiero activarlo" abra un WhatsApp contigo, agrega en Vercel (Settings, Environment Variables) la llave `NEXT_PUBLIC_NURA_WHATSAPP` con tu número de 10 dígitos y haz **Redeploy**. Sin ella, la pantalla dice que se lo pidan al equipo de Nura.
+
+## Bot de WhatsApp ($199 al mes por barbería)
+
+Un solo número de WhatsApp de Nura atiende a todas las barberías. El cliente abre el enlace de su barbería (viene con su código), elige servicio, con quién, día y hora en listas, y confirma. La reserva llega a Hoy como "por confirmar", con las mismas reglas que la página: horarios, descansos y sin empalmes.
+
+### 1. Conseguir el número (una sola vez, gratis para empezar)
+
+1. Entra a [developers.facebook.com](https://developers.facebook.com) con tu cuenta, **Mis apps**, **Crear app**, tipo **Negocios**, nombre `Nura`.
+2. Agrega el producto **WhatsApp**. Meta te da un número de prueba; para clientes reales agrega un número propio que no esté usando WhatsApp en un teléfono (un chip nuevo sirve).
+3. En **Configuración de la app**, **Básica**, copia la **Clave secreta de la app**.
+4. En **Business Settings** de Meta crea un **Usuario del sistema** con rol de administrador, dale acceso a la app y genera un **token permanente** con los permisos `whatsapp_business_messaging` y `whatsapp_business_management`.
+5. En **WhatsApp**, **Configuración de la API**, copia el **Identificador del número de teléfono** (Phone number ID).
+
+### 2. Ponerle las llaves a la app (en Vercel, nunca en el chat)
+
+En Vercel, **Settings**, **Environment Variables**:
+
+| Key | Value |
+| --- | --- |
+| `WHATSAPP_TOKEN` | el token permanente |
+| `WHATSAPP_PHONE_ID` | el identificador del número |
+| `WHATSAPP_APP_SECRET` | la clave secreta de la app |
+| `WHATSAPP_VERIFY_TOKEN` | una palabra que tú inventes, por ejemplo `nura-bot-2026` |
+| `NEXT_PUBLIC_NURA_BOT_NUMERO` | el número del bot, 10 dígitos |
+| `NEXT_PUBLIC_SITE_URL` | la dirección de tu app, por ejemplo `https://nura-nura-ebbe.vercel.app` |
+
+Luego **Redeploy**.
+
+### 3. Conectar WhatsApp con la app
+
+1. En Meta, **WhatsApp**, **Configuración**, **Webhook**, toca **Editar**.
+2. **URL de devolución de llamada**: `https://TU-APP.vercel.app/api/whatsapp`. **Token de verificación**: la misma palabra de `WHATSAPP_VERIFY_TOKEN`. Toca **Verificar y guardar**.
+3. En **Campos del webhook**, suscríbete a **messages**.
+
+### 4. Activar el bot a una barbería
+
+Supabase, **Table Editor**, tabla **salones**, columna **bot_hasta**: la fecha hasta la que pagó. En su Cuenta, **Bot de WhatsApp**, le aparece su enlace para compartir y en su página pública sale "Reservar por WhatsApp".
+
+### Costos de Meta
+
+Contestar a quien te escribe primero (que es lo que hace el bot) no tiene costo hasta 1,000 mensajes al mes por número; desde el mensaje 1,001 Meta cobra cada uno, y pide tener un método de pago registrado. Una reserva completa usa unos 6 mensajes del bot, así que el tramo gratis alcanza para unas 160 reservas al mes entre todas las barberías. Revisa la tabla de precios de Meta antes de cobrar más barberías.

@@ -2,7 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { SUPABASE_ANON_KEY, SUPABASE_URL, supabaseConfigurado } from "@/lib/supabase/config";
 
-const RUTAS_PRIVADAS = ["/hoy", "/alta", "/servicios", "/equipo", "/agenda", "/api/respaldo", "/elegir", "/inicio", "/citas", "/tu", "/clientes", "/subir", "/trabajos", "/cuenta", "/nueva-contrasena", "/negocio"];
+const RUTAS_PRIVADAS = ["/hoy", "/alta", "/servicios", "/equipo", "/agenda", "/api/respaldo", "/elegir", "/inicio", "/citas", "/tu", "/clientes", "/subir", "/trabajos", "/cuenta", "/nueva-contrasena", "/negocio", "/bot"];
 
 // Mantiene viva la sesión y manda a "Entrar" a quien no tiene cuenta.
 export async function middleware(request: NextRequest) {
@@ -24,8 +24,12 @@ export async function middleware(request: NextRequest) {
 
   // getClaims revisa la sesión en el servidor de la app, sin ir a Supabase en
   // cada pantalla (solo cuando hay que renovarla).
-  const { data } = await supabase.auth.getClaims();
-  const user = data?.claims?.sub ?? null;
+  const { data, error } = await supabase.auth.getClaims();
+  let user = data?.claims?.sub ?? null;
+  // Si no se pudo revisar así (y sí hay sesión guardada), se pregunta a Supabase.
+  if (!user && error && request.cookies.getAll().some((c) => c.name.includes("-auth-token"))) {
+    user = (await supabase.auth.getUser()).data.user?.id ?? null;
+  }
 
   const privada = RUTAS_PRIVADAS.some((r) => request.nextUrl.pathname.startsWith(r));
   if (!user && privada) {

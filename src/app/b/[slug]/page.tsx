@@ -10,6 +10,7 @@ import { supabaseConfigurado } from "@/lib/supabase/config";
 import { duracionTexto, enlaceWhatsApp, pesos, textoCabello, textoCategoria } from "@/lib/formato";
 import { medallaSalon, medallaTrabajo } from "@/lib/medallas";
 import { salonPorSlug } from "@/lib/publico";
+import { enlaceBot } from "@/lib/insights";
 import { diaSemana, hoyLocal } from "@/lib/tiempo";
 
 export const dynamic = "force-dynamic";
@@ -66,6 +67,7 @@ export default async function PaginaSalon({ params, searchParams }: { params: Pr
   const atiendenHoy = equipo.filter((e) => e.horarios.some((h) => h.dia === hoy)).length;
   const anios = Math.max(0, ...equipo.map((e) => e.anios_oficio ?? 0));
   const portada = salon.portada_url ?? todos[0]?.foto_despues;
+  const bot = salon.bot_hasta && salon.bot_hasta >= hoyLocal() ? enlaceBot(salon.slug) : null;
   const puedeReservar = servicios.length > 0 && equipo.some((e) => e.horarios.length > 0);
 
   return (
@@ -212,8 +214,19 @@ export default async function PaginaSalon({ params, searchParams }: { params: Pr
           </section>
         )}
 
-        {(salon.direccion || salon.whatsapp) && (
+        {(salon.direccion || salon.whatsapp || bot) && (
           <ul className="filas">
+            {bot && (
+              <li>
+                <a className="fila-precio" href={bot} target="_blank" rel="noreferrer" style={{ color: "var(--accion-500)" }}>
+                  <p>
+                    Reservar por WhatsApp
+                    <small>Te contesta al instante, a cualquier hora</small>
+                  </p>
+                  <Icono nombre="mensaje" tamano={18} />
+                </a>
+              </li>
+            )}
             {salon.direccion && (
               <li>
                 <a className="fila-precio" href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${salon.direccion}, ${salon.colonia}, Guadalajara`)}`} target="_blank" rel="noreferrer">

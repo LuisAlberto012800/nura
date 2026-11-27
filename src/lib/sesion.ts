@@ -9,12 +9,18 @@ export type Usuario = { id: string; email: string | null; user_metadata: Record<
 // partes lo pidan, y revisa la sesión sin ir a Supabase cuando se puede.
 export const sesionActual = cache(async () => {
   const supabase = await crearClienteServidor();
-  const { data } = await supabase.auth.getClaims();
+  const { data, error } = await supabase.auth.getClaims();
   const c = data?.claims;
-  const user: Usuario | null = c?.sub
-    ? { id: c.sub, email: (c.email as string | undefined) ?? null, user_metadata: (c.user_metadata as Record<string, unknown> | undefined) ?? {} }
-    : null;
-  return { supabase, user };
+  if (c?.sub) {
+    const user: Usuario = { id: c.sub, email: (c.email as string | undefined) ?? null, user_metadata: (c.user_metadata as Record<string, unknown> | undefined) ?? {} };
+    return { supabase, user };
+  }
+  // Si no se pudo revisar localmente, se pregunta a Supabase (más lento, pero seguro).
+  if (error) {
+    const u = (await supabase.auth.getUser()).data.user;
+    if (u) return { supabase, user: { id: u.id, email: u.email ?? null, user_metadata: u.user_metadata ?? {} } as Usuario };
+  }
+  return { supabase, user: null as Usuario | null };
 });
 
 const salonDe = cache(async (userId: string) => {
