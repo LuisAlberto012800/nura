@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { crearClienteServidor } from "@/lib/supabase/server";
+import { sesionActual } from "@/lib/sesion";
 import { salonDelUsuario } from "@/lib/salon";
 import { DIAS, HORAS } from "@/lib/horarios";
 import { dentroDeTurno, turnosDelDia } from "@/lib/disponibilidad";
@@ -16,10 +16,7 @@ function refrescar() {
 }
 
 async function contexto() {
-  const supabase = await crearClienteServidor();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { supabase, user } = await sesionActual();
   if (!user) redirect("/entrar");
   const salon = await salonDelUsuario(supabase, user.id);
   if (!salon) redirect("/alta");

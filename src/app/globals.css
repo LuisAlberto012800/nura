@@ -764,3 +764,6 @@ button.bloque { border: 0; text-align: left; font: inherit; cursor: pointer; ali
 .tarjeta-enlace { display: flex; flex-direction: column; gap: 8px; color: inherit; text-decoration: none; }
 .foto-subible-boton img { position: absolute; inset: 0; }
 .foto-subible.banda .foto-subible-boton { display: block; }
+.esqueleto { display: block; width: 100%; border-radius: 10px; background: linear-gradient(90deg, var(--superficie-200) 0%, var(--superficie-000) 50%, var(--superficie-200) 100%); background-size: 200% 100%; animation: brillo 1.2s ease-in-out infinite; }
+@keyframes brillo { from { background-position: 100% 0; } to { background-position: -100% 0; } }
+@media (prefers-reduced-motion: reduce) { .esqueleto { animation: none; } }

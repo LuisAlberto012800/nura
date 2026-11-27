@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { Icono } from "@/components/Iconos";
 import { SinConfigurar } from "@/components/SinConfigurar";
 import { supabaseConfigurado } from "@/lib/supabase/config";
-import { crearClienteServidor } from "@/lib/supabase/server";
+import { sesionActual } from "@/lib/sesion";
 import { salonDelUsuario } from "@/lib/salon";
 import { HORAS } from "@/lib/horarios";
 import { esDiaValido, fechaLarga, hoyLocal } from "@/lib/tiempo";
@@ -15,10 +15,7 @@ export const dynamic = "force-dynamic";
 export default async function Bloquear({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
   if (!supabaseConfigurado) return <SinConfigurar />;
   const sp = await searchParams;
-  const supabase = await crearClienteServidor();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { supabase, user } = await sesionActual();
   if (!user) redirect("/entrar");
   const salon = await salonDelUsuario(supabase, user.id);
   if (!salon) redirect("/alta");

@@ -4,7 +4,7 @@ import { Icono } from "@/components/Iconos";
 import { AccionesCita } from "@/components/AccionesCita";
 import { SinConfigurar } from "@/components/SinConfigurar";
 import { supabaseConfigurado } from "@/lib/supabase/config";
-import { crearClienteServidor } from "@/lib/supabase/server";
+import { sesionActual } from "@/lib/sesion";
 import { duracionTexto, enlaceWhatsApp, pesos } from "@/lib/formato";
 import { aMinutos, diaLocal, fechaLarga, horaLocal } from "@/lib/tiempo";
 import { cambiarEstado } from "../../acciones";
@@ -48,10 +48,7 @@ function Boton({ id, estado, texto, clase }: { id: string; estado: string; texto
 export default async function DetalleCita({ params }: { params: Promise<{ id: string }> }) {
   if (!supabaseConfigurado) return <SinConfigurar />;
   const { id } = await params;
-  const supabase = await crearClienteServidor();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { supabase, user } = await sesionActual();
   if (!user) redirect("/");
 
   // Las reglas de la base de datos solo devuelven citas del salón propio.

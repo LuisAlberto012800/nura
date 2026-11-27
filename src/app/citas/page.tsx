@@ -4,17 +4,14 @@ import { BarraClienta } from "@/components/BarraClienta";
 import { Espejo } from "@/components/Logo";
 import { SinConfigurar } from "@/components/SinConfigurar";
 import { supabaseConfigurado } from "@/lib/supabase/config";
-import { crearClienteServidor } from "@/lib/supabase/server";
+import { sesionActual } from "@/lib/sesion";
 
 export const metadata = { title: "Citas · Nura" };
 export const dynamic = "force-dynamic";
 
 export default async function Citas() {
   if (!supabaseConfigurado) return <SinConfigurar />;
-  const supabase = await crearClienteServidor();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { user } = await sesionActual();
   if (!user) redirect("/");
 
   return (

@@ -22,9 +22,10 @@ export async function middleware(request: NextRequest) {
     },
   });
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // getClaims revisa la sesión en el servidor de la app, sin ir a Supabase en
+  // cada pantalla (solo cuando hay que renovarla).
+  const { data } = await supabase.auth.getClaims();
+  const user = data?.claims?.sub ?? null;
 
   const privada = RUTAS_PRIVADAS.some((r) => request.nextUrl.pathname.startsWith(r));
   if (!user && privada) {
@@ -36,5 +37,6 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|icons|icon.svg|manifest.webmanifest|favicon.ico).*)"],
+  // Las páginas públicas (barbería, trabajo, confirmar) no necesitan sesión.
+  matcher: ["/((?!_next/static|_next/image|icons|icon.svg|manifest.webmanifest|favicon.ico|b/|t/|confirmar/|api/whatsapp).*)"],
 };
