@@ -40,10 +40,11 @@ export default async function Hoy() {
     .eq("salon_id", salon.id)
     .eq("usuario_id", user.id)
     .maybeSingle();
-  const [servicios, trabajos, clientes] = await Promise.all([
+  const [servicios, trabajos, clientes, horarios] = await Promise.all([
     contar(supabase, "servicios", salon.id),
     contar(supabase, "trabajos", salon.id),
     contar(supabase, "clientes", salon.id),
+    contar(supabase, "horarios", salon.id),
   ]);
   const primerNombre = (yo?.nombre ?? "").split(" ")[0];
 
@@ -51,7 +52,7 @@ export default async function Hoy() {
     { hecho: true, texto: "Datos de tu barbería" },
     { hecho: servicios > 0, texto: "Servicios y precios", href: "/servicios" },
     { hecho: trabajos >= 3, texto: "Tus primeros 3 trabajos" },
-    { hecho: false, texto: "Equipo y horarios" },
+    { hecho: horarios > 0, texto: "Equipo y horarios", href: "/equipo" },
   ];
   const listos = pendientes.filter((p) => p.hecho).length;
 

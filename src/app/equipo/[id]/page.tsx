@@ -1,0 +1,83 @@
+import Link from "next/link";
+import { notFound, redirect } from "next/navigation";
+import { Icono } from "@/components/Iconos";
+import { SinConfigurar } from "@/components/SinConfigurar";
+import { supabaseConfigurado } from "@/lib/supabase/config";
+import { crearClienteServidor } from "@/lib/supabase/server";
+import { DIAS, horaCorta, horarioSugerido, type DiaHorario } from "@/lib/horarios";
+import { cambiarActivo } from "../acciones";
+import { FormularioEstilista } from "../FormularioEstilista";
+
+export const metadata = { title: "Estilista · Nura" };
+export const dynamic = "force-dynamic";
+
+export default async function EditarEstilista({ params }: { params: Promise<{ id: string }> }) {
+  if (!supabaseConfigurado) return <SinConfigurar />;
+  const { id } = await params;
+  const supabase = await crearClienteServidor();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/entrar");
+
+  // Las reglas de la base de datos solo devuelven estilistas del salón propio.
+  const { data: estilista } = await supabase
+    .from("estilistas")
+    .select("id, nombre, especialidades, anios_oficio, activo, usuario_id, horarios(dia, inicio, fin)")
+    .eq("id", id)
+    .maybeSingle();
+  if (!estilista) notFound();
+
+  const guardado = (estilista.horarios ?? []) as { dia: number; inicio: string; fin: string }[];
+  const esSugerido = guardado.length === 0;
+  const horario: DiaHorario[] = esSugerido
+    ? horarioSugerido()
+    : DIAS.map((d) => {
+        const h = guardado.find((x) => x.dia === d.valor);
+        return h
+          ? { dia: d.valor, atiende: true, inicio: horaCorta(h.inicio), fin: horaCorta(h.fin) }
+          : { dia: d.valor, atiende: false, inicio: "10:00", fin: "20:00" };
+      });
+  const esYo = estilista.usuario_id === user.id;
+
+  return (
+    <main className="pantalla">
+      <div className="contenido">
+        <Link href="/equipo" className="volver">
+          <Icono nombre="atras" tamano={18} />
+          Equipo
+        </Link>
+        <div>
+          <h1 className="titulo">{estilista.nombre}</h1>
+          {esYo && <p className="subtitulo">Este es tu perfil.</p>}
+        </div>
+
+        <FormularioEstilista
+          estilista={{
+            id: estilista.id,
+            nombre: estilista.nombre,
+            especialidades: estilista.especialidades ?? [],
+            anios_oficio: estilista.anios_oficio,
+          }}
+          horario={horario}
+          esSugerido={esSugerido}
+        />
+
+        {!esYo && (
+          <form action={cambiarActivo} style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            <input type="hidden" name="id" value={estilista.id} />
+            <input type="hidden" name="activo" value={String(estilista.activo)} />
+            <button type="submit" className={estilista.activo ? "btn btn-peligro" : "btn btn-sec"}>
+              {estilista.activo ? "Ya no trabaja aquí" : "Volver a activar"}
+            </button>
+            <p className="meta">
+              {estilista.activo
+                ? "Deja de aparecer en la agenda y en tu página, pero se conservan sus citas y trabajos."
+                : "Volverá a aparecer en la agenda y en tu página."}
+            </p>
+          </form>
+        )}
+      </div>
+    </main>
+  );
+}
