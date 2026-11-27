@@ -25,3 +25,15 @@ export function enlaceBot(slug: string): string | null {
   if (!numero) return null;
   return `https://wa.me/${numero.replace(/\D/g, "").length === 10 ? `52${numero.replace(/\D/g, "")}` : numero.replace(/\D/g, "")}?text=${encodeURIComponent(`Hola, quiero reservar en ${slug}`)}`;
 }
+
+// Complementos nuevos. Precios propuestos: ajústalos aquí si cambian.
+export const PRECIO_VACANTES = 99;
+export const PRECIO_CHAT = 149;
+
+async function fechaActiva(supabase: SupabaseClient, salonId: string, columna: "vacantes_hasta" | "chat_hasta") {
+  const { data, error } = await supabase.from("salones").select(columna).eq("id", salonId).maybeSingle();
+  const valor = (data as Record<string, string | null> | null)?.[columna];
+  return !error && !!valor && String(valor) >= hoyLocal();
+}
+export const vacantesActivas = (s: SupabaseClient, id: string) => fechaActiva(s, id, "vacantes_hasta");
+export const chatActivo = (s: SupabaseClient, id: string) => fechaActiva(s, id, "chat_hasta");

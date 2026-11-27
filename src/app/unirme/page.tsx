@@ -59,6 +59,9 @@ export default async function Unirme() {
           </>
         )}
         <div style={{ display: "flex", flexDirection: "column", gap: 4, alignItems: "center" }}>
+          <Link href="/empleos" className="meta" style={{ color: "var(--accion-500)", fontWeight: 700, textDecoration: "none" }}>
+            Buscar trabajo en otra barbería
+          </Link>
           <Link href="/alta" className="meta" style={{ color: "var(--accion-500)", fontWeight: 700, textDecoration: "none" }}>
             Mejor doy de alta mi propia barbería
           </Link>

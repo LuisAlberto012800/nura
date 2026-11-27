@@ -67,6 +67,9 @@ export default async function PaginaSalon({ params, searchParams }: { params: Pr
   const atiendenHoy = equipo.filter((e) => e.horarios.some((h) => h.dia === hoy)).length;
   const anios = Math.max(0, ...equipo.map((e) => e.anios_oficio ?? 0));
   const portada = salon.portada_url ?? todos[0]?.foto_despues;
+  // Solo los barberos ven si esta barbería está contratando (la base de datos lo filtra).
+  const { data: dVacantes } = await supabase.from("vacantes").select("id").eq("salon_id", salon.id).eq("abierta", true).limit(5);
+  const vacantes = (dVacantes ?? []) as { id: string }[];
   const bot = salon.bot_hasta && salon.bot_hasta >= hoyLocal() ? enlaceBot(salon.slug) : null;
   const puedeReservar = servicios.length > 0 && equipo.some((e) => e.horarios.length > 0);
 
@@ -212,6 +215,18 @@ export default async function PaginaSalon({ params, searchParams }: { params: Pr
               ))}
             </ul>
           </section>
+        )}
+
+        {vacantes.length > 0 && (
+          <Link href={vacantes.length === 1 ? `/empleos/${vacantes[0].id}` : "/empleos"} className="tarjeta tarjeta-azul enlace-unirme">
+            <span>
+              <strong>Están contratando</strong>
+              <span className="meta">
+                {vacantes.length === 1 ? "1 vacante abierta" : `${vacantes.length} vacantes abiertas`} · solo lo ven barberos
+              </span>
+            </span>
+            <Icono nombre="siguiente" tamano={18} />
+          </Link>
         )}
 
         {(salon.direccion || salon.whatsapp || bot) && (
