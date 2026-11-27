@@ -1,16 +1,17 @@
 "use client";
 
 import { useFormulario } from "@/lib/useFormulario";
-import { useState } from "react";
+import type { Rol } from "@/lib/rol";
 import { entrarOCrear, type EstadoEntrar } from "./acciones";
 
-export function FormularioEntrar() {
-  const [modo, setModo] = useState<"entrar" | "crear">("crear");
+// Correo y contraseña. modo "crear" registra con el rol elegido; "entrar" inicia sesión.
+export function FormularioEntrar({ modo, rol }: { modo: "entrar" | "crear"; rol?: Rol }) {
   const { estado, enviar, enviando } = useFormulario<EstadoEntrar>(entrarOCrear, {});
 
   return (
     <form onSubmit={enviar} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
       <input type="hidden" name="modo" value={modo} />
+      {rol && <input type="hidden" name="rol" value={rol} />}
       <label className="campo">
         <span>Correo</span>
         <input id="correo" name="correo" type="email" autoComplete="email" inputMode="email" required />
@@ -32,15 +33,7 @@ export function FormularioEntrar() {
       {estado.aviso && <p className="aviso aviso-azul" role="status">{estado.aviso}</p>}
 
       <button className="btn" type="submit" disabled={enviando}>
-        {enviando ? "Un momento…" : modo === "crear" ? "Crear cuenta" : "Entrar"}
-      </button>
-      <button
-        type="button"
-        className="btn btn-texto"
-        style={{ alignSelf: "center" }}
-        onClick={() => setModo(modo === "crear" ? "entrar" : "crear")}
-      >
-        {modo === "crear" ? "Ya tengo cuenta: entrar" : "Soy nuevo: crear cuenta"}
+        {enviando ? "Un momento…" : modo === "crear" ? "Crear cuenta" : "Iniciar sesión"}
       </button>
     </form>
   );

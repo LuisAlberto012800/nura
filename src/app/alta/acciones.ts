@@ -45,5 +45,8 @@ export async function darDeAlta(_: EstadoAlta, form: FormData): Promise<EstadoAl
     .insert({ salon_id: salonId, usuario_id: user.id, nombre: tuNombre });
   if (errorEstilista) return { error: "Tu barbería quedó guardada, pero no tu perfil. Entra de nuevo para terminar." };
 
+  // Quien da de alta una barbería queda como profesional.
+  if (user.user_metadata?.rol !== "profesional") await supabase.auth.updateUser({ data: { rol: "profesional" } });
+
   redirect("/hoy");
 }

@@ -2,7 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { SUPABASE_ANON_KEY, SUPABASE_URL, supabaseConfigurado } from "@/lib/supabase/config";
 
-const RUTAS_PRIVADAS = ["/hoy", "/alta", "/servicios", "/equipo", "/agenda", "/api/respaldo"];
+const RUTAS_PRIVADAS = ["/hoy", "/alta", "/servicios", "/equipo", "/agenda", "/api/respaldo", "/elegir", "/inicio", "/citas", "/tu"];
 
 // Mantiene viva la sesión y manda a "Entrar" a quien no tiene cuenta.
 export async function middleware(request: NextRequest) {
@@ -29,7 +29,7 @@ export async function middleware(request: NextRequest) {
   const privada = RUTAS_PRIVADAS.some((r) => request.nextUrl.pathname.startsWith(r));
   if (!user && privada) {
     const url = request.nextUrl.clone();
-    url.pathname = "/entrar";
+    url.pathname = "/";
     return NextResponse.redirect(url);
   }
   return response;

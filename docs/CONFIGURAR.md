@@ -86,3 +86,33 @@ Para que funcione el correo de confirmación de cuenta:
 ## Cada semana
 
 Los lunes, toca **Descargar respaldo** en la app y guarda el archivo en tu computadora o en tu nube. El plan gratis de Supabase no hace respaldos automáticos.
+
+## Opcional · Entrar con Google o Facebook
+
+La app ya trae los botones; aparecen solo cuando los enciendes. Las dos cuentas de desarrollador son gratis. El teléfono queda para después porque cada mensaje SMS cuesta.
+
+### Google
+
+1. Entra a [console.cloud.google.com](https://console.cloud.google.com) con tu cuenta personal y crea un proyecto llamado `Nura`.
+2. Ve a **APIs y servicios**, **Pantalla de consentimiento de OAuth**. Elige **Externo**, nombre de la app `Nura`, tu correo de soporte, y guarda.
+3. Ve a **Credenciales**, **Crear credenciales**, **ID de cliente de OAuth**, tipo **Aplicación web**.
+4. En Supabase abre **Authentication**, **Sign In / Providers**, **Google**. Ahí aparece una dirección llamada **Callback URL** que termina en `/auth/v1/callback`. Cópiala.
+5. Regresa a Google y pégala en **URIs de redireccionamiento autorizados**. Crea la credencial.
+6. Google te muestra dos datos: **ID de cliente** y **Secreto del cliente**. Pégalos directo en la pantalla de Google en Supabase (nunca en el chat) y enciende el interruptor.
+
+### Facebook
+
+1. Entra a [developers.facebook.com](https://developers.facebook.com), **Mis apps**, **Crear app**, caso de uso **Autenticar y solicitar datos a los usuarios con el inicio de sesión con Facebook**.
+2. En **Inicio de sesión con Facebook**, **Configuración**, pega la misma **Callback URL** de Supabase (la de Facebook, en **Sign In / Providers**, **Facebook**) en **URI de redireccionamiento de OAuth válidos**.
+3. En **Configuración de la app**, **Básica**, copia el **Identificador de la app** y la **Clave secreta**, y pégalos en la pantalla de Facebook en Supabase. Enciende el interruptor.
+4. Mientras la app de Facebook esté en modo desarrollo, solo tú y quien agregues como probador pueden entrar. Para abrirla a todos, Facebook pide una dirección de aviso de privacidad.
+
+### Encender los botones en la app
+
+En Vercel, **Settings**, **Environment Variables**, agrega:
+
+| Key | Value |
+| --- | --- |
+| `NEXT_PUBLIC_LOGIN_PROVIDERS` | `google,facebook` (o solo `google`) |
+
+Luego **Deployments**, los tres puntos del último y **Redeploy**. Si enciendes un botón en la app antes de terminar su pantalla en Supabase, al tocarlo verás un aviso y nada se rompe.

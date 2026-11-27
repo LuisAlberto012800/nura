@@ -10,6 +10,9 @@ const TRAZOS = {
   reloj: "M12 3.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17zM12 7.5V12l3 2",
   candado: "M5 10.5h14v9.5H5zM8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5",
   atras: "M15 5l-7 7 7 7",
+  descubrir: "M4 4h7v9H4zM13 4h7v5h-7zM4 15h7v5H4zM13 11h7v9h-7z",
+  buscar: "M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM20 20l-4-4",
+  usuario: "M12 12.3a3.8 3.8 0 1 0 0-7.6 3.8 3.8 0 0 0 0 7.6zM5 20c1.2-3.6 4-5.2 7-5.2s5.8 1.6 7 5.2",
   siguiente: "M9 5l7 7-7 7",
 } as const;
 
