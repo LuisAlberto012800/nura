@@ -4,7 +4,7 @@ import { Icono } from "@/components/Iconos";
 import { SinConfigurar } from "@/components/SinConfigurar";
 import { supabaseConfigurado } from "@/lib/supabase/config";
 import { crearClienteServidor } from "@/lib/supabase/server";
-import { duracionTexto, pesos } from "@/lib/formato";
+import { duracionTexto, enlaceWhatsApp, pesos } from "@/lib/formato";
 import { aMinutos, diaLocal, fechaLarga, horaLocal } from "@/lib/tiempo";
 import { cambiarEstado } from "../../acciones";
 
@@ -19,7 +19,7 @@ type Cita = {
   precio: number | null;
   notas: string | null;
   estilista_id: string;
-  cliente: { nombre: string; telefono: string | null } | null;
+  cliente: { id: string; nombre: string; telefono: string | null } | null;
   servicio: { nombre: string } | null;
   estilista: { nombre: string } | null;
 };
@@ -51,13 +51,13 @@ export default async function DetalleCita({ params }: { params: Promise<{ id: st
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect("/entrar");
+  if (!user) redirect("/");
 
   // Las reglas de la base de datos solo devuelven citas del salón propio.
   const { data } = await supabase
     .from("citas")
     .select(
-      "id, inicio, fin, estado, precio, notas, estilista_id, cliente:clientes(nombre, telefono), servicio:servicios(nombre), estilista:estilistas(nombre)",
+      "id, inicio, fin, estado, precio, notas, estilista_id, cliente:clientes(id, nombre, telefono), servicio:servicios(nombre), estilista:estilistas(nombre)",
     )
     .eq("id", id)
     .maybeSingle();
@@ -93,10 +93,22 @@ export default async function DetalleCita({ params }: { params: Promise<{ id: st
 
         <div className="tarjeta" style={{ gap: 4 }}>
           <span className="etiqueta">Cliente</span>
-          <strong style={{ fontSize: 18 }}>{cita.cliente?.nombre ?? "Sin cliente"}</strong>
+          {cita.cliente ? (
+            <Link href={`/clientes/${cita.cliente.id}`} className="fila-separada" style={{ color: "inherit", textDecoration: "none" }}>
+              <strong style={{ fontSize: 18 }}>{cita.cliente.nombre}</strong>
+              <Icono nombre="siguiente" tamano={16} />
+            </Link>
+          ) : (
+            <strong style={{ fontSize: 18 }}>Sin cliente</strong>
+          )}
           {telefono && <span className="meta" style={{ userSelect: "all" }}>{telefono}</span>}
           {telefono && (
-            <a className="btn btn-sec" style={{ marginTop: 8 }} href={`https://wa.me/52${telefono}`} target="_blank" rel="noopener noreferrer">
+            <a className="btn btn-sec" style={{ marginTop: 8 }} href={enlaceWhatsApp(
+                telefono,
+                cita.estado === "por_confirmar"
+                  ? `Hola ${cita.cliente?.nombre.split(" ")[0] ?? ""}, confirmamos tu cita el ${fechaLarga(dia).toLowerCase()} a las ${horaLocal(cita.inicio)}.`
+                  : undefined,
+              )} target="_blank" rel="noopener noreferrer">
               Escribir por WhatsApp
             </a>
           )}
@@ -128,6 +140,12 @@ export default async function DetalleCita({ params }: { params: Promise<{ id: st
           </div>
         )}
         {cita.estado === "cancelada" && <Boton id={cita.id} estado="confirmada" texto="Volver a agendarla en el mismo horario" clase="btn btn-sec" />}
+        {cita.estado === "completada" && (
+          <Link className="btn" href={`/subir?cita=${cita.id}`}>
+            <Icono nombre="camara" tamano={18} />
+            Subir foto del trabajo
+          </Link>
+        )}
         {cita.estado === "no_asistio" && <Boton id={cita.id} estado="completada" texto="Sí vino: marcar como completada" clase="btn btn-sec" />}
       </div>
     </main>
