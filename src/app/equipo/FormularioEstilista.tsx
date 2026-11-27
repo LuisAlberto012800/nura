@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { Ventana } from "@/components/Ventana";
 import { useFormulario } from "@/lib/useFormulario";
 import { DIAS, HORAS, type DiaHorario } from "@/lib/horarios";
 import { guardarEstilista, type EstadoEquipo } from "./acciones";
@@ -18,13 +19,26 @@ export function FormularioEstilista({
 }) {
   const { estado, enviar, enviando } = useFormulario<EstadoEquipo>(guardarEstilista, {});
   const [dias, setDias] = useState(horario);
+  const formulario = useRef<HTMLFormElement>(null);
+  const confirmar = useRef<HTMLInputElement>(null);
+  const [vista, setVista] = useState<EstadoEquipo | null>(null);
+  const conflictos = estado.conflictos && vista !== estado ? estado.conflictos : null;
+
+  // Guarda aunque haya citas fuera del nuevo horario; las citas se conservan.
+  const guardarIgual = () => {
+    setVista(estado);
+    if (confirmar.current) confirmar.current.value = "si";
+    formulario.current?.requestSubmit();
+    if (confirmar.current) confirmar.current.value = "";
+  };
 
   const cambiar = (dia: number, cambio: Partial<DiaHorario>) =>
     setDias((actual) => actual.map((d) => (d.dia === dia ? { ...d, ...cambio } : d)));
 
   return (
-    <form onSubmit={enviar} style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+    <form ref={formulario} onSubmit={enviar} style={{ display: "flex", flexDirection: "column", gap: 18 }}>
       <input type="hidden" name="id" value={estilista.id} />
+      <input type="hidden" name="confirmar" ref={confirmar} defaultValue="" />
 
       <section className="tarjeta" aria-labelledby="datos">
         <h2 id="datos" className="etiqueta">Datos</h2>
@@ -120,6 +134,31 @@ export function FormularioEstilista({
       <button className="btn" type="submit" disabled={enviando}>
         {enviando ? "Guardando…" : "Guardar"}
       </button>
+
+      {conflictos && (
+        <Ventana
+          titulo={conflictos.length === 1 ? "Hay 1 cita en ese horario" : `Hay ${conflictos.length} citas en ese horario`}
+          onCerrar={() => setVista(estado)}
+          acciones={
+            <>
+              <button type="button" className="btn btn-sec" onClick={() => setVista(estado)} autoFocus>
+                No guardar
+              </button>
+              <button type="button" className="btn" onClick={guardarIgual}>
+                Guardar de todos modos
+              </button>
+            </>
+          }
+        >
+          <p>Con el nuevo horario estas citas quedan fuera. Si guardas, se conservan y tendrás que moverlas o avisar al cliente.</p>
+          <ul className="lista-conflictos">
+            {conflictos.slice(0, 6).map((c) => (
+              <li key={c}>{c}</li>
+            ))}
+            {conflictos.length > 6 && <li>y {conflictos.length - 6} más</li>}
+          </ul>
+        </Ventana>
+      )}
     </form>
   );
 }

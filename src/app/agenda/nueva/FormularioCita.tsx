@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useFormulario } from "@/lib/useFormulario";
+import { Ventana } from "@/components/Ventana";
 import { duracionTexto, pesos } from "@/lib/formato";
 import { aMinutos, etiquetaDia, fechaLarga, diaSemana } from "@/lib/tiempo";
 import { horasLibres, textoTurnos, turnosDelDia, type Ocupado, type Turno } from "@/lib/disponibilidad";
@@ -244,15 +245,9 @@ export function FormularioCita({
       </div>
 
       {mensaje && (
-        <div className="velo" role="presentation" onClick={cerrar}>
-          <div className="ventana" role="alertdialog" aria-modal="true" aria-labelledby="ventana-titulo" onClick={(e) => e.stopPropagation()}>
-            <strong id="ventana-titulo">No está disponible</strong>
-            <p>{mensaje}</p>
-            <button type="button" className="btn" onClick={cerrar} autoFocus>
-              Entendido
-            </button>
-          </div>
-        </div>
+        <Ventana titulo="No está disponible" onCerrar={cerrar}>
+          <p>{mensaje}</p>
+        </Ventana>
       )}
     </form>
   );

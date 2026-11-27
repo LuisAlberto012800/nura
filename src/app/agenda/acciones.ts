@@ -25,8 +25,7 @@ async function contexto() {
 const HORA = /^\d{2}:\d{2}$/;
 
 function volver(dia: string, estilista: string, extra = "") {
-  revalidatePath("/agenda");
-  revalidatePath("/hoy");
+  revalidatePath("/", "layout");
   redirect(`/agenda?dia=${dia}&e=${estilista}${extra}`);
 }
 

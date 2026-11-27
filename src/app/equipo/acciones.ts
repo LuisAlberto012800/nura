@@ -5,8 +5,15 @@ import { redirect } from "next/navigation";
 import { crearClienteServidor } from "@/lib/supabase/server";
 import { salonDelUsuario } from "@/lib/salon";
 import { DIAS, HORAS } from "@/lib/horarios";
+import { dentroDeTurno, turnosDelDia } from "@/lib/disponibilidad";
+import { aInstante, diaLocal, etiquetaDia, horaLocal, hoyLocal } from "@/lib/tiempo";
 
-export type EstadoEquipo = { error?: string; ok?: boolean };
+export type EstadoEquipo = { error?: string; ok?: boolean; conflictos?: string[] };
+
+// Las pantallas de agenda, Hoy y la página pública leen el horario: se refrescan todas.
+function refrescar() {
+  revalidatePath("/", "layout");
+}
 
 async function contexto() {
   const supabase = await crearClienteServidor();
@@ -50,7 +57,7 @@ export async function crearEstilista(_: EstadoEquipo, form: FormData): Promise<E
     .single();
   if (errorDb || !data) return { error: "No pudimos agregar al estilista. Intenta de nuevo." };
 
-  revalidatePath("/equipo");
+  refrescar();
   redirect(`/equipo/${data.id}`);
 }
 
@@ -72,6 +79,34 @@ export async function guardarEstilista(_: EstadoEquipo, form: FormData): Promise
   }
 
   const { supabase, salon } = await contexto();
+
+  // Antes de guardar: ¿quedan citas futuras fuera del nuevo horario?
+  if (form.get("confirmar") !== "si") {
+    const { data: futuras } = await supabase
+      .from("citas")
+      .select("inicio, fin, cliente:clientes(nombre)")
+      .eq("salon_id", salon.id)
+      .eq("estilista_id", id)
+      .in("estado", ["por_confirmar", "confirmada"])
+      .gte("inicio", aInstante(hoyLocal(), "00:00"))
+      .order("inicio")
+      .limit(500);
+    const fuera = ((futuras ?? []) as unknown as { inicio: string; fin: string; cliente: { nombre: string } | null }[]).filter((c) => {
+      const dia = diaLocal(c.inicio);
+      const duracion = Math.round((Date.parse(c.fin) - Date.parse(c.inicio)) / 60000);
+      return !dentroDeTurno(turnosDelDia(filas, dia), horaLocal(c.inicio), duracion);
+    });
+    if (fuera.length > 0) {
+      return {
+        conflictos: fuera.map((c) => {
+          const dia = diaLocal(c.inicio);
+          const { corto, numero } = etiquetaDia(dia);
+          return `${corto} ${numero} · ${horaLocal(c.inicio)} · ${c.cliente?.nombre ?? "Sin cliente"}`;
+        }),
+      };
+    }
+  }
+
   const { error: errorDatos } = await supabase
     .from("estilistas")
     .update({ nombre: datos.nombre, especialidades: datos.especialidades, anios_oficio: datos.anios })
@@ -89,8 +124,7 @@ export async function guardarEstilista(_: EstadoEquipo, form: FormData): Promise
     if (errorHorario) return { error: "El horario no se guardó completo. Vuelve a tocar Guardar." };
   }
 
-  revalidatePath("/equipo");
-  revalidatePath("/hoy");
+  refrescar();
   return { ok: true };
 }
 
@@ -100,6 +134,5 @@ export async function cambiarActivo(form: FormData) {
   const activo = form.get("activo") === "true";
   const { supabase, salon } = await contexto();
   await supabase.from("estilistas").update({ activo: !activo }).eq("id", id).eq("salon_id", salon.id);
-  revalidatePath("/equipo");
-  revalidatePath(`/equipo/${id}`);
+  refrescar();
 }

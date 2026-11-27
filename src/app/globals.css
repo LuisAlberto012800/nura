@@ -421,7 +421,11 @@ a.franja:hover, a.franja:focus-visible { background: color-mix(in srgb, var(--az
 .tira-elegir .dia-chip.activo { background: var(--azul-500); border-color: var(--azul-500); }
 .dia-chip small { font-size: 10px; font-weight: 700; min-height: 13px; color: var(--tinta-400); text-transform: lowercase; }
 .dia-chip.activo small { color: #fff; }
-.dia-chip.descansa { background: var(--superficie-200); border-style: dashed; opacity: 0.55; }
+.dia-chip.descansa {
+  background: repeating-linear-gradient(135deg, transparent 0 6px, color-mix(in srgb, var(--borde-200) 45%, transparent) 6px 8px);
+  opacity: 0.6;
+}
+.tira-elegir .dia-chip.descansa { border-style: dashed; }
 .dia-chip.descansa strong { text-decoration: line-through; color: var(--tinta-400); }
 
 .horas-libres { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
@@ -458,3 +462,8 @@ a.franja:hover, a.franja:focus-visible { background: color-mix(in srgb, var(--az
 @keyframes aparecer { from { opacity: 0; } }
 @keyframes subir-ventana { from { transform: translateY(16px); opacity: 0; } }
 @media (min-width: 520px) { .velo { align-items: center; } }
+
+.ventana .btn + .btn { margin-top: -2px; }
+.lista-conflictos { margin: 0 0 6px; padding: 10px 12px; list-style: none; border-radius: var(--radio-sm); background: var(--superficie-200); font-size: 14px; display: flex; flex-direction: column; gap: 4px; font-variant-numeric: tabular-nums; }
+.dia-chip.activo.descansa { background: var(--azul-500); opacity: 1; }
+.dia-chip.activo.descansa strong { text-decoration: none; color: #fff; }

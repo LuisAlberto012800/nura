@@ -43,8 +43,7 @@ export async function guardarServicio(_: EstadoServicio, form: FormData): Promis
     : await supabase.from("servicios").insert({ ...datos, salon_id: salon.id });
   if (error) return { error: "No pudimos guardar el servicio. Intenta de nuevo." };
 
-  revalidatePath("/servicios");
-  revalidatePath("/hoy");
+  revalidatePath("/", "layout");
   if (id) redirect("/servicios");
   return { ok: true };
 }
@@ -54,14 +53,13 @@ export async function cambiarVisible(form: FormData) {
   const activo = form.get("activo") === "true";
   const { supabase, salon } = await contexto();
   await supabase.from("servicios").update({ activo: !activo }).eq("id", id).eq("salon_id", salon.id);
-  revalidatePath("/servicios");
+  revalidatePath("/", "layout");
 }
 
 export async function borrarServicio(form: FormData) {
   const id = String(form.get("id") ?? "");
   const { supabase, salon } = await contexto();
   await supabase.from("servicios").delete().eq("id", id).eq("salon_id", salon.id);
-  revalidatePath("/servicios");
-  revalidatePath("/hoy");
+  revalidatePath("/", "layout");
   redirect("/servicios");
 }

@@ -151,7 +151,12 @@ export default async function Agenda({ searchParams }: { searchParams: Promise<R
           {dias.map((d) => {
             const { corto, numero } = etiquetaDia(d);
             return (
-              <Link key={d} href={consulta(d)} className={`dia-chip${d === dia ? " activo" : ""}`} aria-current={d === dia ? "date" : undefined}>
+              <Link
+                key={d}
+                href={consulta(d)}
+                className={`dia-chip${d === dia ? " activo" : ""}${estilista.horarios.some((h) => h.dia === diaSemana(d)) ? "" : " descansa"}`}
+                aria-current={d === dia ? "date" : undefined}
+              >
                 <span>{d === hoy ? "Hoy" : corto}</span>
                 <strong>{numero}</strong>
               </Link>
