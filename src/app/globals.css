@@ -562,3 +562,6 @@ a.tarjeta-trabajo { display: block; color: inherit; text-decoration: none; }
 .btn-peligro-lleno { background: var(--peligro-500); color: #fff; }
 .btn-peligro-lleno:active { background: var(--peligro-500); filter: brightness(0.9); }
 button.bloque { border: 0; text-align: left; font: inherit; cursor: pointer; align-items: stretch; }
+.listo-check.espera { background: var(--azul-100); color: var(--azul-700); }
+.enlace-unirme { flex-direction: row; align-items: center; justify-content: space-between; text-decoration: none; color: inherit; }
+.enlace-unirme > span { display: flex; flex-direction: column; gap: 2px; }

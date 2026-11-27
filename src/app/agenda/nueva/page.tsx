@@ -15,12 +15,12 @@ export const dynamic = "force-dynamic";
 export default async function NuevaCita({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
   if (!supabaseConfigurado) return <SinConfigurar />;
   const sp = await searchParams;
-  const { supabase, salon } = await contextoBarberia();
+  const { supabase, user, salon } = await contextoBarberia();
   const { hoy, dias, equipo, servicios, clientes, ocupados } = await datosParaCita(supabase, salon.id);
 
   const dia = esDiaValido(sp.dia) && dias.includes(sp.dia) ? sp.dia : hoy;
   const hora = sp.hora && HORAS.includes(sp.hora) ? sp.hora : undefined;
-  const estilistaId = equipo.find((e) => e.id === sp.e)?.id ?? equipo[0]?.id ?? "";
+  const estilistaId = equipo.find((e) => e.id === sp.e)?.id ?? equipo.find((e) => e.usuario_id === user.id)?.id ?? equipo[0]?.id ?? "";
   const volver = `/agenda?dia=${dia}${estilistaId ? `&e=${estilistaId}` : ""}`;
 
   return (

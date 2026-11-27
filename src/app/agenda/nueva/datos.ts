@@ -13,7 +13,7 @@ export async function datosParaCita(supabase: SupabaseClient, salonId: string, e
   const desde = aInstante(hoy, "00:00");
   const hasta = aInstante(sumarDias(hoy, DIAS_VISIBLES), "00:00");
   const [{ data: equipo }, { data: servicios }, { data: clientes }, { data: citas }, { data: bloqueos }] = await Promise.all([
-    supabase.from("estilistas").select("id, nombre, horarios(dia, inicio, fin)").eq("salon_id", salonId).eq("activo", true).order("creado_en"),
+    supabase.from("estilistas").select("id, nombre, usuario_id, horarios(dia, inicio, fin)").eq("salon_id", salonId).eq("activo", true).order("creado_en"),
     supabase.from("servicios").select("id, nombre, duracion_min, precio").eq("salon_id", salonId).eq("activo", true).order("orden").order("creado_en"),
     supabase.from("clientes").select("id, nombre, telefono").eq("salon_id", salonId).order("nombre").limit(2000),
     supabase
@@ -33,7 +33,7 @@ export async function datosParaCita(supabase: SupabaseClient, salonId: string, e
   return {
     hoy,
     dias,
-    equipo: (equipo ?? []) as { id: string; nombre: string; horarios: Turno[] }[],
+    equipo: (equipo ?? []) as { id: string; nombre: string; usuario_id: string | null; horarios: Turno[] }[],
     servicios: (servicios ?? []) as { id: string; nombre: string; duracion_min: number; precio: number }[],
     clientes: (clientes ?? []) as { id: string; nombre: string; telefono: string | null }[],
     ocupados,

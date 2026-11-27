@@ -3,7 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { Icono } from "@/components/Iconos";
 import { SinConfigurar } from "@/components/SinConfigurar";
 import { supabaseConfigurado } from "@/lib/supabase/config";
-import { crearClienteServidor } from "@/lib/supabase/server";
+import { contextoEncargado } from "@/lib/sesion";
 import { borrarServicio } from "../acciones";
 import { FormularioServicio } from "../FormularioServicio";
 
@@ -13,11 +13,7 @@ export const dynamic = "force-dynamic";
 export default async function EditarServicio({ params }: { params: Promise<{ id: string }> }) {
   if (!supabaseConfigurado) return <SinConfigurar />;
   const { id } = await params;
-  const supabase = await crearClienteServidor();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/entrar");
+  const { supabase, salon } = await contextoEncargado();
 
   // Las reglas de la base de datos solo devuelven servicios del salón propio.
   const { data: servicio } = await supabase

@@ -29,12 +29,17 @@ export default async function Hoy() {
   const { supabase, user, salon } = await contextoBarberia();
   const hoy = hoyLocal();
 
-  const [{ data: yo }, { data: datosHoy }, { data: datosPorConfirmar }, conteos] = await Promise.all([
-    supabase.from("estilistas").select("nombre").eq("salon_id", salon.id).eq("usuario_id", user.id).maybeSingle(),
+  const { data: yo } = await supabase.from("estilistas").select("id, nombre").eq("salon_id", salon.id).eq("usuario_id", user.id).maybeSingle();
+  // El barbero ve sus propias citas; el encargado ve las de todo el equipo.
+  const soloMias = salon.rol === "estilista" && yo ? yo.id : null;
+  const mias: Record<string, string> = soloMias ? { estilista_id: soloMias } : {};
+
+  const [{ data: datosHoy }, { data: datosPorConfirmar }, conteos, { data: dSolicitudes }] = await Promise.all([
     supabase
       .from("citas")
       .select(CITA)
       .eq("salon_id", salon.id)
+      .match(mias)
       .in("estado", ["confirmada", "por_confirmar", "completada"])
       .gte("inicio", aInstante(hoy, "00:00"))
       .lt("inicio", aInstante(sumarDias(hoy, 1), "00:00"))
@@ -43,6 +48,7 @@ export default async function Hoy() {
       .from("citas")
       .select(CITA)
       .eq("salon_id", salon.id)
+      .match(mias)
       .eq("estado", "por_confirmar")
       .gte("inicio", new Date().toISOString())
       .order("inicio")
@@ -54,7 +60,11 @@ export default async function Hoy() {
         supabase.from("trabajos").select("id", { count: "exact", head: true }).eq("salon_id", salon.id),
       ].map(async (q) => (await q).count ?? 0),
     ),
+    salon.rol === "dueno"
+      ? supabase.from("solicitudes").select("id, nombre").eq("salon_id", salon.id).eq("estado", "pendiente")
+      : Promise.resolve({ data: [] as { id: string; nombre: string }[] }),
   ]);
+  const solicitudes = (dSolicitudes ?? []) as { id: string; nombre: string }[];
   const [servicios, horarios, trabajos] = conteos;
   const citasHoy = (datosHoy ?? []) as unknown as Cita[];
   const porConfirmar = (datosPorConfirmar ?? []) as unknown as Cita[];
@@ -118,6 +128,18 @@ export default async function Hoy() {
           <Logo alto={22} />
         </div>
 
+        {solicitudes.length > 0 && (
+          <Link href="/equipo" className="tarjeta tarjeta-azul enlace-unirme">
+            <span>
+              <strong>
+                {solicitudes.length === 1 ? `${solicitudes[0].nombre} quiere unirse a tu equipo` : `${solicitudes.length} barberos quieren unirse a tu equipo`}
+              </strong>
+              <span className="meta">Confirma que trabajan contigo.</span>
+            </span>
+            <Icono nombre="siguiente" tamano={18} />
+          </Link>
+        )}
+
         {porConfirmar.length > 0 && (
           <section className="tarjeta tarjeta-azul" aria-labelledby="reservas">
             <h2 id="reservas" className="etiqueta" style={{ color: "var(--azul-700)" }}>
@@ -158,7 +180,7 @@ export default async function Hoy() {
           )}
         </section>
 
-        {listos < pendientes.length && (
+        {salon.rol === "dueno" && listos < pendientes.length && (
           <section className="tarjeta" aria-labelledby="pendientes">
             <div className="fila-separada">
               <h2 id="pendientes" className="etiqueta">Para recibir reservas</h2>

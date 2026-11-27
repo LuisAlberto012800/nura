@@ -18,6 +18,7 @@ export async function GET() {
 
   const salon = await salonDelUsuario(supabase, user.id);
   if (!salon) return NextResponse.json({ error: "Todavía no tienes una barbería." }, { status: 404 });
+  if (salon.rol !== "dueno") return NextResponse.json({ error: "Solo el encargado puede descargar el respaldo." }, { status: 403 });
 
   const datos: Record<string, unknown[]> = {};
   for (const tabla of TABLAS) {

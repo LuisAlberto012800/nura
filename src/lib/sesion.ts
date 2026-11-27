@@ -13,3 +13,10 @@ export async function contextoBarberia() {
   if (!salon) redirect("/alta");
   return { supabase, user, salon };
 }
+
+// Para lo que solo cambia el encargado: precios, horarios, equipo, datos.
+export async function contextoEncargado() {
+  const ctx = await contextoBarberia();
+  if (ctx.salon.rol !== "dueno") redirect("/cuenta");
+  return ctx;
+}

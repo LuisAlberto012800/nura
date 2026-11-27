@@ -21,12 +21,12 @@ type Cita = {
 export default async function Subir({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
   if (!supabaseConfigurado) return <SinConfigurar />;
   const sp = await searchParams;
-  const { supabase, salon } = await contextoBarberia();
+  const { supabase, user, salon } = await contextoBarberia();
   const hoy = hoyLocal();
 
   const [{ data: servicios }, { data: equipo }, { data: datosCitas }] = await Promise.all([
     supabase.from("servicios").select("id, nombre, duracion_min, precio").eq("salon_id", salon.id).eq("activo", true).order("orden").order("creado_en"),
-    supabase.from("estilistas").select("id, nombre").eq("salon_id", salon.id).eq("activo", true).order("creado_en"),
+    supabase.from("estilistas").select("id, nombre, usuario_id").eq("salon_id", salon.id).eq("activo", true).order("creado_en"),
     supabase
       .from("citas")
       .select("id, inicio, servicio_id, estilista_id, servicio:servicios(nombre), cliente:clientes(nombre, tipo_cabello)")
@@ -73,6 +73,7 @@ export default async function Subir({ searchParams }: { searchParams: Promise<Re
             colonia={salon.colonia}
             servicios={servicios}
             equipo={equipo ?? []}
+            estilistaPropio={(equipo ?? []).find((e) => e.usuario_id === user.id)?.id}
             citas={citas}
             citaInicial={sp.cita}
           />

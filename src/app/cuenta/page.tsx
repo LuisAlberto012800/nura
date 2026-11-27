@@ -17,6 +17,7 @@ export const dynamic = "force-dynamic";
 export default async function Cuenta() {
   if (!supabaseConfigurado) return <SinConfigurar />;
   const { supabase, salon } = await contextoBarberia();
+  if (salon.rol === "estilista") return <CuentaBarbero salonId={salon.id} nombre={salon.nombre} slug={salon.slug} />;
   const [{ data: verif }, { count: servicios }, { count: horarios }, { count: trabajos }, { count: confirmados }, { count: equipo }] = await Promise.all([
     supabase.from("salones").select("whatsapp, local_verificado_en, identidad_verificada_en, creado_en").eq("id", salon.id).single(),
     supabase.from("servicios").select("id", { count: "exact", head: true }).eq("salon_id", salon.id).eq("activo", true),
@@ -102,6 +103,62 @@ export default async function Cuenta() {
         </a>
         <p className="meta" style={{ margin: "-6px 0 0", textAlign: "center" }}>Hazlo cada lunes. El plan gratis no guarda copias.</p>
 
+        <form action={salir} style={{ alignSelf: "center" }}>
+          <button type="submit" className="btn btn-texto" style={{ color: "var(--tinta-600)" }}>
+            Cerrar sesión
+          </button>
+        </form>
+      </div>
+      <BarraBarberia activa="cuenta" />
+    </main>
+  );
+}
+
+// Cuenta del barbero que trabaja en una barbería: su perfil y sus trabajos.
+// Precios, horarios y datos de la barbería los maneja el encargado.
+async function CuentaBarbero({ salonId, nombre, slug }: { salonId: string; nombre: string; slug: string }) {
+  const { supabase, user } = await contextoBarberia();
+  const { data: yo } = await supabase.from("estilistas").select("id, nombre").eq("salon_id", salonId).eq("usuario_id", user.id).maybeSingle();
+  const { count: trabajos } = yo
+    ? await supabase.from("trabajos").select("id", { count: "exact", head: true }).eq("salon_id", salonId).eq("estilista_id", yo.id)
+    : { count: 0 };
+  return (
+    <main className="pantalla">
+      <div className="contenido">
+        <div>
+          <h1 className="titulo">{yo?.nombre ?? "Tu cuenta"}</h1>
+          <p className="subtitulo">Barbero en {nombre}</p>
+        </div>
+        <ul className="lista-servicios">
+          <li>
+            <Link href="/cuenta/perfil" className="fila-cliente">
+              <span className="servicio-info">
+                <strong>Mi perfil</strong>
+                <span className="meta">Nombre, especialidades y tu horario</span>
+              </span>
+              <Icono nombre="siguiente" tamano={16} />
+            </Link>
+          </li>
+          <li>
+            <Link href="/trabajos" className="fila-cliente">
+              <span className="servicio-info">
+                <strong>Mis trabajos</strong>
+                <span className="meta">{trabajos ?? 0} subidos</span>
+              </span>
+              <Icono nombre="siguiente" tamano={16} />
+            </Link>
+          </li>
+          <li>
+            <Link href={`/b/${slug}`} className="fila-cliente">
+              <span className="servicio-info">
+                <strong>Página de {nombre}</strong>
+                <span className="meta">Servicios, precios y trabajos del equipo</span>
+              </span>
+              <Icono nombre="siguiente" tamano={16} />
+            </Link>
+          </li>
+        </ul>
+        <p className="meta" style={{ margin: 0 }}>Precios, horarios y datos de la barbería los cambia tu encargado.</p>
         <form action={salir} style={{ alignSelf: "center" }}>
           <button type="submit" className="btn btn-texto" style={{ color: "var(--tinta-600)" }}>
             Cerrar sesión

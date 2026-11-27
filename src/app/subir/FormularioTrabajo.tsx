@@ -28,6 +28,7 @@ export function FormularioTrabajo({
   equipo,
   citas,
   citaInicial,
+  estilistaPropio,
 }: {
   salonId: string;
   colonia: string;
@@ -35,6 +36,7 @@ export function FormularioTrabajo({
   equipo: Opcion[];
   citas: CitaReciente[];
   citaInicial?: string;
+  estilistaPropio?: string;
 }) {
   const [estado, despachar, pendiente] = useActionState<EstadoTrabajo, FormData>(crearTrabajo, {});
   const [enTransicion, iniciar] = useTransition();
@@ -44,7 +46,7 @@ export function FormularioTrabajo({
   const [antes, setAntes] = useState<Foto | null>(null);
   const [citaId, setCitaId] = useState(inicial?.id ?? "");
   const [servicioId, setServicioId] = useState(inicial?.servicio_id ?? servicios[0]?.id ?? "");
-  const [estilistaId, setEstilistaId] = useState(inicial?.estilista_id ?? equipo[0]?.id ?? "");
+  const [estilistaId, setEstilistaId] = useState(inicial?.estilista_id ?? estilistaPropio ?? equipo[0]?.id ?? "");
   const [cabello, setCabello] = useState(inicial?.cliente_cabello ?? "");
   const [colonia, setColonia] = useState(coloniaSalon);
   const [cara, setCara] = useState(false);

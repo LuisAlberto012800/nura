@@ -8,19 +8,22 @@ export type Salon = {
   whatsapp: string | null;
   abierto_hoy: boolean;
   publicado: boolean;
+  /** "dueno" es el encargado: cambia precios, horarios y equipo. */
+  rol: "dueno" | "estilista";
 };
 
 // El salón al que pertenece quien tiene la sesión abierta (por ahora, uno por persona).
 export async function salonDelUsuario(supabase: SupabaseClient, usuarioId: string): Promise<Salon | null> {
   const { data } = await supabase
     .from("miembros")
-    .select("salon:salones(id, nombre, slug, colonia, whatsapp, abierto_hoy, publicado)")
+    .select("rol, salon:salones(id, nombre, slug, colonia, whatsapp, abierto_hoy, publicado)")
     .eq("usuario_id", usuarioId)
     .order("creado_en", { ascending: true })
     .limit(1)
     .maybeSingle();
-  const salon = (data as { salon: Salon | Salon[] | null } | null)?.salon ?? null;
-  return Array.isArray(salon) ? (salon[0] ?? null) : salon;
+  const fila = data as { rol: Salon["rol"]; salon: Omit<Salon, "rol"> | Omit<Salon, "rol">[] | null } | null;
+  const salon = Array.isArray(fila?.salon) ? (fila?.salon[0] ?? null) : (fila?.salon ?? null);
+  return salon && fila ? { ...salon, rol: fila.rol } : null;
 }
 
 // "Salón Alba" -> "salon-alba"

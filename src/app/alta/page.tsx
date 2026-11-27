@@ -4,6 +4,8 @@ import { supabaseConfigurado } from "@/lib/supabase/config";
 import { crearClienteServidor } from "@/lib/supabase/server";
 import { salonDelUsuario } from "@/lib/salon";
 import { FormularioAlta } from "./FormularioAlta";
+import Link from "next/link";
+import { Icono } from "@/components/Iconos";
 
 export const metadata = { title: "Alta de tu barbería · Nura" };
 export const dynamic = "force-dynamic";
@@ -34,6 +36,13 @@ export default async function Alta() {
           <p className="subtitulo">Lo básico para empezar. Lo demás lo agregas cuando quieras.</p>
         </div>
         <FormularioAlta />
+        <Link href="/unirme" className="tarjeta enlace-unirme">
+          <span>
+            <strong>¿Trabajas en una barbería que ya está en Nura?</strong>
+            <span className="meta">Únete a su equipo en lugar de crear otra.</span>
+          </span>
+          <Icono nombre="siguiente" tamano={18} />
+        </Link>
       </div>
     </main>
   );

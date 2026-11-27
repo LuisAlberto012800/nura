@@ -26,7 +26,7 @@ export const dynamic = "force-dynamic";
 
 const ALTO_MEDIA_HORA = 48; // px por cada 30 minutos
 
-type Estilista = { id: string; nombre: string; horarios: { dia: number; inicio: string; fin: string }[] };
+type Estilista = { id: string; nombre: string; usuario_id: string | null; horarios: { dia: number; inicio: string; fin: string }[] };
 type Cita = {
   id: string;
   inicio: string;
@@ -60,7 +60,7 @@ export default async function Agenda({ searchParams }: { searchParams: Promise<R
 
   const { data: datosEquipo } = await supabase
     .from("estilistas")
-    .select("id, nombre, horarios(dia, inicio, fin)")
+    .select("id, nombre, usuario_id, horarios(dia, inicio, fin)")
     .eq("salon_id", salon.id)
     .eq("activo", true)
     .order("creado_en");
@@ -81,7 +81,7 @@ export default async function Agenda({ searchParams }: { searchParams: Promise<R
     );
   }
 
-  const estilista = equipo.find((e) => e.id === sp.e) ?? equipo[0];
+  const estilista = equipo.find((e) => e.id === sp.e) ?? equipo.find((e) => e.usuario_id === user.id) ?? equipo[0];
   const desde = aInstante(dia, "00:00");
   const hasta = aInstante(sumarDias(dia, 1), "00:00");
 

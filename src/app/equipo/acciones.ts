@@ -133,6 +133,20 @@ export async function cambiarActivo(form: FormData) {
   const id = String(form.get("id") ?? "");
   const activo = form.get("activo") === "true";
   const { supabase, salon } = await contexto();
+  // Si ya no trabaja aquí, también pierde el acceso a la agenda y los clientes.
+  if (activo) await supabase.rpc("quitar_acceso", { p_estilista: id });
   await supabase.from("estilistas").update({ activo: !activo }).eq("id", id).eq("salon_id", salon.id);
   refrescar();
+}
+
+// Solicitud de un barbero para unirse. Se puede ligar a un perfil que ya existe
+// (para conservar su horario e historial) o crear uno nuevo.
+export async function responderSolicitud(form: FormData) {
+  const id = String(form.get("solicitud") ?? "");
+  const aceptar = form.get("respuesta") === "aceptar";
+  const estilista = String(form.get("estilista") ?? "") || null;
+  const { supabase } = await contexto();
+  const { data } = await supabase.rpc("responder_solicitud", { p_solicitud: id, p_aceptar: aceptar, p_estilista: estilista });
+  refrescar();
+  if (aceptar && data) redirect(`/equipo/${data}?nuevo=1`);
 }

@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { Icono } from "@/components/Iconos";
 import { SinConfigurar } from "@/components/SinConfigurar";
 import { supabaseConfigurado } from "@/lib/supabase/config";
-import { crearClienteServidor } from "@/lib/supabase/server";
+import { contextoEncargado } from "@/lib/sesion";
 import { DIAS, horaCorta, horarioSugerido, type DiaHorario } from "@/lib/horarios";
 import { cambiarActivo } from "../acciones";
 import { FormularioEstilista } from "../FormularioEstilista";
@@ -11,14 +11,11 @@ import { FormularioEstilista } from "../FormularioEstilista";
 export const metadata = { title: "Estilista · Nura" };
 export const dynamic = "force-dynamic";
 
-export default async function EditarEstilista({ params }: { params: Promise<{ id: string }> }) {
+export default async function EditarEstilista({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<Record<string, string | undefined>> }) {
   if (!supabaseConfigurado) return <SinConfigurar />;
   const { id } = await params;
-  const supabase = await crearClienteServidor();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/entrar");
+  const sp = await searchParams;
+  const { supabase, user } = await contextoEncargado();
 
   // Las reglas de la base de datos solo devuelven estilistas del salón propio.
   const { data: estilista } = await supabase
@@ -50,7 +47,13 @@ export default async function EditarEstilista({ params }: { params: Promise<{ id
         <div>
           <h1 className="titulo">{estilista.nombre}</h1>
           {esYo && <p className="subtitulo">Este es tu perfil.</p>}
+          {!esYo && estilista.usuario_id && <p className="subtitulo">Tiene cuenta en Nura: ve la agenda y sube sus trabajos. El horario solo lo cambias tú.</p>}
         </div>
+        {sp.nuevo && (
+          <p className="aviso aviso-exito" role="status" style={{ margin: 0 }}>
+            Ya es parte de tu equipo. Revisa su horario y toca Guardar.
+          </p>
+        )}
 
         <FormularioEstilista
           estilista={{
@@ -72,7 +75,7 @@ export default async function EditarEstilista({ params }: { params: Promise<{ id
             </button>
             <p className="meta">
               {estilista.activo
-                ? "Deja de aparecer en la agenda y en tu página, pero se conservan sus citas y trabajos."
+                ? `Deja de aparecer en la agenda y en tu página${estilista.usuario_id ? " y pierde el acceso a la app" : ""}. Se conservan sus citas y trabajos.`
                 : "Volverá a aparecer en la agenda y en tu página."}
             </p>
           </form>

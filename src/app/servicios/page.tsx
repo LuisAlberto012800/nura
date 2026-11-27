@@ -4,8 +4,7 @@ import { BarraBarberia } from "@/components/BarraBarberia";
 import { Icono } from "@/components/Iconos";
 import { SinConfigurar } from "@/components/SinConfigurar";
 import { supabaseConfigurado } from "@/lib/supabase/config";
-import { crearClienteServidor } from "@/lib/supabase/server";
-import { salonDelUsuario } from "@/lib/salon";
+import { contextoEncargado } from "@/lib/sesion";
 import { duracionTexto, pesos } from "@/lib/formato";
 import { cambiarVisible } from "./acciones";
 import { FormularioServicio } from "./FormularioServicio";
@@ -17,13 +16,7 @@ type Servicio = { id: string; nombre: string; duracion_min: number; precio: numb
 
 export default async function Servicios() {
   if (!supabaseConfigurado) return <SinConfigurar />;
-  const supabase = await crearClienteServidor();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/entrar");
-  const salon = await salonDelUsuario(supabase, user.id);
-  if (!salon) redirect("/alta");
+  const { supabase, salon } = await contextoEncargado();
 
   const { data } = await supabase
     .from("servicios")

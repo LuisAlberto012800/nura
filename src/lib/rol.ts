@@ -1,4 +1,5 @@
 import type { SupabaseClient, User } from "@supabase/supabase-js";
+import { cookies } from "next/headers";
 import { salonDelUsuario } from "./salon";
 
 // Cada cuenta es de una clienta o de un profesional (estilista o barbero).
@@ -7,6 +8,7 @@ import { salonDelUsuario } from "./salon";
 export type Rol = "cliente" | "profesional";
 export const COOKIE_ROL = "nura_rol";
 export const COOKIE_RECUPERAR = "nura_recuperar";
+export const COOKIE_UNIRME = "nura_unirme";
 
 export function esRol(valor: unknown): valor is Rol {
   return valor === "cliente" || valor === "profesional";
@@ -16,7 +18,14 @@ export function esRol(valor: unknown): valor is Rol {
 export async function destinoDe(supabase: SupabaseClient, user: User): Promise<string> {
   if (await salonDelUsuario(supabase, user.id)) return "/hoy";
   const rol = user.user_metadata?.rol;
-  if (rol === "profesional") return "/alta";
+  if (rol === "profesional") {
+    // Si llegó con una invitación o ya pidió unirse a una barbería, va a esa pantalla.
+    const invitacion = (await cookies()).get(COOKIE_UNIRME)?.value;
+    if (invitacion) return `/unirme/${invitacion}`;
+    const { data } = await supabase.from("solicitudes").select("id").eq("usuario_id", user.id).eq("estado", "pendiente").limit(1);
+    if (data?.length) return "/unirme";
+    return "/alta";
+  }
   if (rol === "cliente") return "/inicio";
   return "/elegir";
 }
