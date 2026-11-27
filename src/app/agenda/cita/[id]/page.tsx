@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Icono } from "@/components/Iconos";
+import { AccionesCita } from "@/components/AccionesCita";
 import { SinConfigurar } from "@/components/SinConfigurar";
 import { supabaseConfigurado } from "@/lib/supabase/config";
 import { crearClienteServidor } from "@/lib/supabase/server";
@@ -132,11 +133,16 @@ export default async function DetalleCita({ params }: { params: Promise<{ id: st
         </div>
 
         {viva && (
+          <AccionesCita
+            id={cita.id}
+            resumen={`${cita.servicio?.nombre ?? "Cita"}${cita.cliente ? ` de ${cita.cliente.nombre.split(" ")[0]}` : ""}, ${fechaLarga(dia).toLowerCase()} a las ${horaLocal(cita.inicio)}`}
+          />
+        )}
+        {viva && (
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             {cita.estado === "por_confirmar" && <Boton id={cita.id} estado="confirmada" texto="Confirmar la cita" clase="btn" />}
             <Boton id={cita.id} estado="completada" texto="Marcar como completada" clase={cita.estado === "por_confirmar" ? "btn btn-sec" : "btn"} />
             <Boton id={cita.id} estado="no_asistio" texto="No asistió" clase="btn btn-sec" />
-            <Boton id={cita.id} estado="cancelada" texto="Cancelar la cita" clase="btn btn-peligro" />
           </div>
         )}
         {cita.estado === "cancelada" && <Boton id={cita.id} estado="confirmada" texto="Volver a agendarla en el mismo horario" clase="btn btn-sec" />}

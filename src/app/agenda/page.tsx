@@ -19,6 +19,7 @@ import {
   sumarDias,
 } from "@/lib/tiempo";
 import { cambiarEstado, quitarBloqueo } from "./acciones";
+import { BloqueCita } from "./BloqueCita";
 
 export const metadata = { title: "Agenda · Nura" };
 export const dynamic = "force-dynamic";
@@ -191,6 +192,9 @@ export default async function Agenda({ searchParams }: { searchParams: Promise<R
             <button type="submit">Deshacer</button>
           </form>
         )}
+        {sp.aviso === "modificada" && (
+          <p className="aviso aviso-exito" role="status" style={{ margin: 0 }}>Cita modificada.</p>
+        )}
         {sp.aviso === "ocupado" && (
           <p className="aviso aviso-error" role="alert">No se pudo deshacer: ese horario ya lo ocupa otra cita.</p>
         )}
@@ -251,20 +255,26 @@ export default async function Agenda({ searchParams }: { searchParams: Promise<R
           {citas.map((c) => {
             const a = minutosDe(c.inicio);
             const z = minutosDe(c.fin) || 24 * 60;
+            const style = { top: y(a) + 2, height: Math.max(y(z) - y(a) - 4, 28) };
+            const titulo = `${horaLocal(c.inicio)} · ${c.servicio?.nombre ?? "Cita"}`;
+            const detalle = `${c.cliente?.nombre ?? "Sin cliente"}${ESTADO_TEXTO[c.estado] ? ` · ${ESTADO_TEXTO[c.estado]}` : ""}`;
+            if (c.estado === "confirmada" || c.estado === "por_confirmar") {
+              return (
+                <BloqueCita
+                  key={c.id}
+                  id={c.id}
+                  estado={c.estado}
+                  titulo={titulo}
+                  detalle={detalle}
+                  resumen={`${c.servicio?.nombre ?? "Cita"}${c.cliente ? ` de ${c.cliente.nombre.split(" ")[0]}` : ""}, ${fechaLarga(dia).toLowerCase()} a las ${horaLocal(c.inicio)}`}
+                  style={style}
+                />
+              );
+            }
             return (
-              <Link
-                key={c.id}
-                href={`/agenda/cita/${c.id}`}
-                className={`bloque cita ${c.estado}`}
-                style={{ top: y(a) + 2, height: Math.max(y(z) - y(a) - 4, 28) }}
-              >
-                <strong>
-                  {horaLocal(c.inicio)} · {c.servicio?.nombre ?? "Cita"}
-                </strong>
-                <span>
-                  {c.cliente?.nombre ?? "Sin cliente"}
-                  {ESTADO_TEXTO[c.estado] ? ` · ${ESTADO_TEXTO[c.estado]}` : ""}
-                </span>
+              <Link key={c.id} href={`/agenda/cita/${c.id}`} className={`bloque cita ${c.estado}`} style={style}>
+                <strong>{titulo}</strong>
+                <span>{detalle}</span>
               </Link>
             );
           })}

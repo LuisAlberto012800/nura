@@ -29,8 +29,9 @@ function volver(dia: string, estilista: string, extra = "") {
   redirect(`/agenda?dia=${dia}&e=${estilista}${extra}`);
 }
 
-// Nueva cita. El empalme lo impide la base de datos; aquí se traduce el error.
-export async function crearCita(_: EstadoAgenda, form: FormData): Promise<EstadoAgenda> {
+// Revisa y arma los datos de una cita (nueva o modificada). El empalme con
+// otra cita lo impide la base de datos; aquí se revisa todo lo demás.
+async function prepararCita(form: FormData) {
   const dia = String(form.get("dia") ?? "");
   const hora = String(form.get("hora") ?? "");
   const estilistaId = String(form.get("estilista_id") ?? "");
@@ -114,23 +115,42 @@ export async function crearCita(_: EstadoAgenda, form: FormData): Promise<Estado
     }
   }
 
-  const { error } = await supabase.from("citas").insert({
-    salon_id: salon.id,
-    estilista_id: estilistaId,
-    cliente_id: idCliente,
-    servicio_id: servicioId,
-    inicio,
-    fin,
-    precio: servicio.precio,
-    estado: "confirmada",
-    notas,
-  });
-  if (error) {
-    if (error.code === "23P01") return { error: "Ese horario se empalma con otra cita. Elige otra hora." };
-    return { error: "No pudimos guardar la cita. Intenta de nuevo." };
-  }
+  return {
+    supabase,
+    salon,
+    dia,
+    estilistaId,
+    datos: { estilista_id: estilistaId, cliente_id: idCliente, servicio_id: servicioId, inicio, fin, precio: servicio.precio, notas },
+  };
+}
 
-  volver(dia, estilistaId);
+const EMPALME = "Ese horario se empalma con otra cita. Elige otra hora.";
+
+export async function crearCita(_: EstadoAgenda, form: FormData): Promise<EstadoAgenda> {
+  const r = await prepararCita(form);
+  if ("error" in r) return { error: r.error };
+  const { error } = await r.supabase.from("citas").insert({ ...r.datos, salon_id: r.salon.id, estado: "confirmada" });
+  if (error) return { error: error.code === "23P01" ? EMPALME : "No pudimos guardar la cita. Intenta de nuevo." };
+  volver(r.dia, r.estilistaId);
+  return {};
+}
+
+// Modificar: cambia día, hora, servicio, quién atiende o cliente. El precio se
+// actualiza al del servicio elegido.
+export async function modificarCita(_: EstadoAgenda, form: FormData): Promise<EstadoAgenda> {
+  const id = String(form.get("cita_id") ?? "");
+  const r = await prepararCita(form);
+  if ("error" in r) return { error: r.error };
+  const { data, error } = await r.supabase
+    .from("citas")
+    .update(r.datos)
+    .eq("id", id)
+    .eq("salon_id", r.salon.id)
+    .in("estado", ["por_confirmar", "confirmada"])
+    .select("id");
+  if (error) return { error: error.code === "23P01" ? EMPALME : "No pudimos guardar los cambios. Intenta de nuevo." };
+  if (!data?.length) return { error: "Esta cita ya no se puede modificar porque se completó o se canceló." };
+  volver(r.dia, r.estilistaId, "&aviso=modificada");
   return {};
 }
 

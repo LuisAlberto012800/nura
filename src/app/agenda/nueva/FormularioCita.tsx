@@ -6,7 +6,7 @@ import { Ventana } from "@/components/Ventana";
 import { duracionTexto, pesos } from "@/lib/formato";
 import { aMinutos, etiquetaDia, fechaLarga, diaSemana } from "@/lib/tiempo";
 import { horasLibres, textoTurnos, turnosDelDia, type Ocupado, type Turno } from "@/lib/disponibilidad";
-import { crearCita, type EstadoAgenda } from "../acciones";
+import { crearCita, modificarCita, type EstadoAgenda } from "../acciones";
 
 type Opcion = { id: string; nombre: string };
 type Estilista = Opcion & { horarios: Turno[] };
@@ -28,6 +28,7 @@ export function FormularioCita({
   clientes,
   ocupados,
   clienteInicial,
+  cita,
 }: {
   dias: string[];
   hoy: string;
@@ -40,11 +41,13 @@ export function FormularioCita({
   clientes: Cliente[];
   ocupados: Ocupado[];
   clienteInicial?: string;
+  /** Si viene, el formulario modifica esta cita en lugar de crear una. */
+  cita?: { id: string; servicio_id: string | null; notas: string | null };
 }) {
-  const { estado, enviar, enviando } = useFormulario<EstadoAgenda>(crearCita, {});
+  const { estado, enviar, enviando } = useFormulario<EstadoAgenda>(cita ? modificarCita : crearCita, {});
   const [modo, setModo] = useState<"nuevo" | "existente">(clientes.length > 0 ? "existente" : "nuevo");
   const [estilistaId, setEstilistaId] = useState(estilistaInicial);
-  const [servicioId, setServicioId] = useState(servicios[0]?.id ?? "");
+  const [servicioId, setServicioId] = useState(servicios.find((x) => x.id === cita?.servicio_id)?.id ?? servicios[0]?.id ?? "");
   const estilista = equipo.find((e) => e.id === estilistaId) ?? equipo[0];
   const servicio = servicios.find((s) => s.id === servicioId);
   const nombreCorto = estilista.nombre.split(" ")[0];
@@ -107,6 +110,7 @@ export function FormularioCita({
 
   return (
     <form onSubmit={enviar} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      {cita && <input type="hidden" name="cita_id" value={cita.id} />}
       <input type="hidden" name="dia" value={dia} />
       <input type="hidden" name="hora" value={hora} />
       <input type="hidden" name="modo_cliente" value={modo} />
@@ -236,13 +240,13 @@ export function FormularioCita({
         )}
         <label className="campo">
           <span>Nota</span>
-          <input id="notas" name="notas" placeholder="Opcional" />
+          <input id="notas" name="notas" placeholder="Opcional" defaultValue={cita?.notas ?? ""} />
         </label>
       </section>
 
       <div className="accion-fija">
         <button className="btn" type="submit" disabled={enviando || !hora}>
-          {enviando ? "Guardando…" : hora ? `Agendar a las ${hora}` : "Elige una hora"}
+          {enviando ? "Guardando…" : !hora ? "Elige una hora" : cita ? `Guardar cambios · ${hora}` : `Agendar a las ${hora}`}
         </button>
       </div>
 
