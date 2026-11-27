@@ -30,3 +30,7 @@ Thumbs.db
 .idea/
 *.log
 npm-debug.log*
+
+# TypeScript y Next.js generados
+next-env.d.ts
+*.tsbuildinfo

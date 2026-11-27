@@ -1,0 +1,163 @@
+/* Sistema de Nura. Terracota = acción (si es terracota, se toca).
+   Azul = orientación, siempre en detalles pequeños. Nunca un botón azul. */
+:root {
+  --superficie-100: #fbf7f2; /* Platino: fondo, nunca blanco puro */
+  --superficie-000: #ffffff; /* tarjetas */
+  --superficie-200: #f3ebe1; /* campos */
+  --borde-100: #e6d7c6;
+  --borde-200: #cdb49a;
+  --tinta-900: #1d1511;
+  --tinta-600: #634936;
+  --tinta-400: #82634b;
+  --marca: #30231b;
+  --accion-500: #b84f2a;
+  --accion-700: #8f3b1e;
+  --accion-100: #fbe5d8;
+  --azul-500: #13707f;
+  --azul-700: #0d5260;
+  --azul-100: #dbebee;
+  --exito-500: #1f7a4d;
+  --peligro-500: #a1203b;
+  --peligro-100: #f9e1e6;
+
+  --radio-sm: 12px;
+  --radio-md: 16px;
+  --radio-lg: 22px;
+  --radio-pill: 999px;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --superficie-100: #1d1511;
+    --superficie-000: #2a1f19;
+    --superficie-200: #33261f;
+    --borde-100: #3d2e25;
+    --borde-200: #5a4536;
+    --tinta-900: #f6eee5;
+    --tinta-600: #cdb49a;
+    --tinta-400: #a88566;
+    --marca: #fbf7f2;
+    --accion-500: #f29466;
+    --accion-700: #de6a36;
+    --accion-100: #4a2a1c;
+    --azul-500: #45b8cd;
+    --azul-700: #8ed6e3;
+    --azul-100: #15343c;
+    --exito-500: #5cc28d;
+    --peligro-500: #f07a8a;
+    --peligro-100: #3d1a21;
+    color-scheme: dark;
+  }
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body {
+  background: var(--superficie-100);
+  color: var(--tinta-900);
+  font-family: var(--fuente), system-ui, -apple-system, sans-serif;
+  font-size: 15px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--accion-500); }
+button, input, select, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--azul-500); outline-offset: 2px; }
+
+/* Contenedor de una pantalla de app, centrado en escritorio */
+.pantalla {
+  max-width: 480px;
+  min-height: 100dvh;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  padding-top: env(safe-area-inset-top, 0px);
+}
+.contenido {
+  flex: 1;
+  padding: 20px max(16px, env(safe-area-inset-left, 0px)) 28px max(16px, env(safe-area-inset-right, 0px));
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.titulo { margin: 0; font-size: 28px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.12; text-wrap: balance; }
+.subtitulo { margin: 4px 0 0; font-size: 15px; color: var(--tinta-600); }
+.etiqueta { margin: 0; font-size: 11px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--tinta-400); }
+.meta { font-size: 13px; color: var(--tinta-400); }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%; min-height: 52px; padding: 0 18px;
+  border: 0; border-radius: var(--radio-md);
+  background: var(--accion-500); color: #fff;
+  font-size: 15px; font-weight: 700; text-decoration: none; cursor: pointer;
+}
+.btn:active { background: var(--accion-700); }
+.btn:disabled { background: var(--superficie-200); color: var(--tinta-400); cursor: not-allowed; }
+.btn-sec { background: transparent; color: var(--tinta-900); border: 1px solid var(--borde-200); }
+.btn-sec:active { background: var(--superficie-200); }
+.btn-texto { background: transparent; color: var(--accion-500); min-height: 44px; width: auto; padding: 0 4px; }
+
+.campo { display: flex; flex-direction: column; gap: 6px; }
+.campo span { font-size: 13px; font-weight: 700; color: var(--tinta-600); }
+.campo input, .campo select, .campo textarea {
+  min-height: 52px; padding: 12px 14px;
+  border: 1px solid var(--borde-200); border-radius: 14px;
+  background: var(--superficie-000);
+  font-size: 16px; font-weight: 600;
+}
+.campo small { font-size: 12px; color: var(--tinta-400); }
+
+.tarjeta {
+  background: var(--superficie-000);
+  border: 1px solid var(--borde-100);
+  border-radius: var(--radio-lg);
+  padding: 16px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+
+.aviso { padding: 12px 14px; border-radius: 14px; font-size: 14px; line-height: 1.45; }
+.aviso-error { background: var(--peligro-100); color: var(--peligro-500); }
+.aviso-azul { background: var(--azul-100); color: var(--azul-700); }
+.aviso-neutro { background: var(--superficie-200); color: var(--tinta-600); }
+
+.progreso { display: flex; gap: 6px; }
+.progreso span { flex: 1; height: 5px; border-radius: var(--radio-pill); background: var(--borde-100); }
+.progreso span.lleno { background: var(--azul-500); }
+
+/* Barra inferior de la barbería */
+.barra {
+  position: sticky; bottom: 0;
+  display: grid; grid-template-columns: repeat(5, 1fr);
+  background: var(--superficie-000);
+  border-top: 1px solid var(--borde-100);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.barra a, .barra span.pronto {
+  position: relative;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+  min-height: 64px;
+  font-size: 11px; font-weight: 600; color: var(--tinta-400); text-decoration: none;
+}
+.barra a.activa { color: var(--tinta-900); font-weight: 800; }
+.barra a.activa::before {
+  content: ""; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  width: 28px; height: 3px; border-radius: 0 0 3px 3px; background: var(--azul-500);
+}
+.barra span.pronto { opacity: 0.45; }
+.barra .central {
+  width: 52px; height: 52px; margin-top: -22px; border-radius: var(--radio-pill);
+  background: var(--accion-500); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 6px 16px -6px rgba(29, 21, 17, 0.4);
+}
+
+.fila { display: flex; align-items: center; gap: 12px; }
+.fila-separada { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.lista-pendientes { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; }
+.lista-pendientes li { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--borde-100); font-size: 15px; }
+.lista-pendientes li:last-child { border-bottom: 0; }
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
