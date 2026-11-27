@@ -36,9 +36,9 @@ export default async function Servicios() {
   return (
     <main className="pantalla">
       <div className="contenido">
-        <Link href="/hoy" className="volver">
+        <Link href="/cuenta" className="volver">
           <Icono nombre="atras" tamano={18} />
-          Hoy
+          Cuenta
         </Link>
         <div>
           <h1 className="titulo">Servicios y precios</h1>
@@ -85,7 +85,7 @@ export default async function Servicios() {
           <FormularioServicio />
         </section>
       </div>
-      <BarraBarberia activa="hoy" />
+      <BarraBarberia activa="cuenta" />
     </main>
   );
 }

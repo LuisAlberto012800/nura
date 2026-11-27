@@ -54,9 +54,9 @@ export default async function Equipo() {
   return (
     <main className="pantalla">
       <div className="contenido">
-        <Link href="/hoy" className="volver">
+        <Link href="/cuenta" className="volver">
           <Icono nombre="atras" tamano={18} />
-          Hoy
+          Cuenta
         </Link>
         <div>
           <h1 className="titulo">Equipo y horarios</h1>
@@ -85,7 +85,7 @@ export default async function Equipo() {
           <FormularioNuevo />
         </section>
       </div>
-      <BarraBarberia activa="hoy" />
+      <BarraBarberia activa="cuenta" />
     </main>
   );
 }

@@ -536,3 +536,22 @@ a.franja:hover, a.franja:focus-visible { background: color-mix(in srgb, var(--az
 .opcion-servicio strong { font-variant-numeric: tabular-nums; }
 .listo-check { width: 60px; height: 60px; border-radius: 50%; background: var(--exito-500); color: #fff; display: flex; align-items: center; justify-content: center; }
 a.tarjeta-trabajo { display: block; color: inherit; text-decoration: none; }
+.enlace-pagina { margin: 0; padding: 10px 12px; border-radius: var(--radio-sm); background: var(--superficie-200); font-size: 14px; font-weight: 600; color: var(--azul-700); overflow-wrap: anywhere; }
+.interruptor:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ---------- Hoy ---------- */
+.tarjeta-azul { background: var(--azul-100); border-color: transparent; }
+.tarjeta-azul .lista-citas li { display: flex; align-items: center; gap: 10px; border-bottom: 1px solid color-mix(in srgb, var(--azul-500) 20%, transparent); }
+.tarjeta-azul .lista-citas li:last-child { border-bottom: 0; }
+.tarjeta-azul .lista-citas li a { flex: 1; min-width: 0; border-bottom: 0; }
+.tarjeta-azul .lista-citas .hora { width: 58px; font-size: 13px; }
+.btn-mini {
+  flex: none; min-height: 36px; padding: 0 14px; border: 0; border-radius: var(--radio-pill);
+  background: var(--accion-500); color: #fff; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer;
+}
+.paso {
+  flex: none; width: 26px; height: 26px; border-radius: 999px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--superficie-200); color: var(--tinta-400);
+}
+.paso.hecho { background: var(--exito-500); color: #fff; }

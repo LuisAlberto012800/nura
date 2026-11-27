@@ -155,6 +155,11 @@ export async function cambiarEstado(form: FormData) {
     // Al deshacer una cancelación, el horario pudo haberse ocupado mientras tanto.
     volver(dia, cita.estilista_id, error.code === "23P01" ? "&aviso=ocupado" : "&aviso=error");
   }
+  // Confirmar desde Hoy deja a la persona en Hoy.
+  if (!error && form.get("volver") === "/hoy") {
+    revalidatePath("/", "layout");
+    redirect("/hoy");
+  }
   if (estado === "completada" && cita.cliente_id) {
     await supabase.from("clientes").update({ ultima_visita: dia }).eq("id", cita.cliente_id).eq("salon_id", salon.id);
   }
