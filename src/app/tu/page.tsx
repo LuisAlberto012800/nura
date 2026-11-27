@@ -61,6 +61,12 @@ export default async function Tu() {
 
         <ul className="filas tarjeta" style={{ padding: "0 16px", gap: 0 }}>
           <li>
+            <Link href="/chats" className="fila-precio">
+              <p>Mis mensajes</p>
+              <Icono nombre="siguiente" tamano={16} />
+            </Link>
+          </li>
+          <li>
             <Link href="/alta" className="fila-precio" style={{ color: "var(--accion-500)" }}>
               <p>Soy estilista: abrir cuenta profesional</p>
               <Icono nombre="siguiente" tamano={16} />

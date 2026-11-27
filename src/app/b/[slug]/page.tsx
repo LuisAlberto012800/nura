@@ -11,6 +11,7 @@ import { duracionTexto, enlaceWhatsApp, pesos, textoCabello, textoCategoria } fr
 import { medallaSalon, medallaTrabajo } from "@/lib/medallas";
 import { salonPorSlug } from "@/lib/publico";
 import { enlaceBot } from "@/lib/insights";
+import { estadoChat, type AjustesChat } from "@/lib/chat";
 import { diaSemana, hoyLocal } from "@/lib/tiempo";
 
 export const dynamic = "force-dynamic";
@@ -70,6 +71,7 @@ export default async function PaginaSalon({ params, searchParams }: { params: Pr
   // Solo los barberos ven si esta barbería está contratando (la base de datos lo filtra).
   const { data: dVacantes } = await supabase.from("vacantes").select("id").eq("salon_id", salon.id).eq("abierta", true).limit(5);
   const vacantes = (dVacantes ?? []) as { id: string }[];
+  const chat = salon.chat_dias ? estadoChat(salon as AjustesChat) : null;
   const bot = salon.bot_hasta && salon.bot_hasta >= hoyLocal() ? enlaceBot(salon.slug) : null;
   const puedeReservar = servicios.length > 0 && equipo.some((e) => e.horarios.length > 0);
 
@@ -229,8 +231,29 @@ export default async function PaginaSalon({ params, searchParams }: { params: Pr
           </Link>
         )}
 
-        {(salon.direccion || salon.whatsapp || bot) && (
+        {(salon.direccion || salon.whatsapp || bot || chat?.activo) && (
           <ul className="filas">
+            {chat?.activo && (
+              <li>
+                {chat.abierto ? (
+                  <Link className="fila-precio" href={`/chat/${salon.slug}`} style={{ color: "var(--accion-500)" }}>
+                    <p>
+                      Chatear con la barbería
+                      <small>Abierto ahora · {chat.horario}</small>
+                    </p>
+                    <Icono nombre="mensaje" tamano={18} />
+                  </Link>
+                ) : (
+                  <span className="fila-precio">
+                    <p>
+                      Chat cerrado
+                      <small>Abre {chat.horario}</small>
+                    </p>
+                    <Icono nombre="reloj" tamano={18} />
+                  </span>
+                )}
+              </li>
+            )}
             {bot && (
               <li>
                 <a className="fila-precio" href={bot} target="_blank" rel="noreferrer" style={{ color: "var(--accion-500)" }}>

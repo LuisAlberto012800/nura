@@ -66,6 +66,9 @@ export default async function Hoy() {
       : Promise.resolve({ data: [] as { id: string; nombre: string }[] }),
   ]);
   const solicitudes = (dSolicitudes ?? []) as { id: string; nombre: string }[];
+  // Mensajes de clientes sin leer (si tiene chat en vivo).
+  const { data: dChats } = await supabase.from("conversaciones").select("id, ultimo_mensaje_en, leido_salon_en").eq("salon_id", salon.id).eq("ultimo_autor", "cliente").limit(50);
+  const sinLeer = ((dChats ?? []) as { ultimo_mensaje_en: string | null; leido_salon_en: string | null }[]).filter((c) => !c.leido_salon_en || (c.ultimo_mensaje_en ?? "") > c.leido_salon_en).length;
 
   // Esta semana (de lunes a hoy): citas completadas, lo cobrado y clientes nuevos.
   const lunes = sumarDias(hoy, -((diaSemana(hoy) + 6) % 7));
@@ -154,6 +157,16 @@ export default async function Hoy() {
                 {solicitudes.length === 1 ? `${solicitudes[0].nombre} quiere unirse a tu equipo` : `${solicitudes.length} barberos quieren unirse a tu equipo`}
               </strong>
               <span className="meta">Confirma que trabajan contigo.</span>
+            </span>
+            <Icono nombre="siguiente" tamano={18} />
+          </Link>
+        )}
+
+        {sinLeer > 0 && (
+          <Link href="/mensajes" className="tarjeta tarjeta-azul enlace-unirme">
+            <span>
+              <strong>{sinLeer === 1 ? "1 mensaje sin leer" : `${sinLeer} mensajes sin leer`}</strong>
+              <span className="meta">Clientes que te escribieron por el chat.</span>
             </span>
             <Icono nombre="siguiente" tamano={18} />
           </Link>

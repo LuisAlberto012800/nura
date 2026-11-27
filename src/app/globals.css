@@ -767,3 +767,21 @@ button.bloque { border: 0; text-align: left; font: inherit; cursor: pointer; ali
 .esqueleto { display: block; width: 100%; border-radius: 10px; background: linear-gradient(90deg, var(--superficie-200) 0%, var(--superficie-000) 50%, var(--superficie-200) 100%); background-size: 200% 100%; animation: brillo 1.2s ease-in-out infinite; }
 @keyframes brillo { from { background-position: 100% 0; } to { background-position: -100% 0; } }
 @media (prefers-reduced-motion: reduce) { .esqueleto { animation: none; } }
+
+/* ---------- Chat ---------- */
+.hilo { flex: 1; display: flex; flex-direction: column; gap: 10px; min-height: 0; }
+.hilo-mensajes { flex: 1; display: flex; flex-direction: column; gap: 8px; min-height: 240px; }
+.burbuja { max-width: 80%; padding: 9px 12px 6px; border-radius: 18px; display: flex; flex-direction: column; gap: 2px; }
+.burbuja p { margin: 0; font-size: 15px; line-height: 1.4; white-space: pre-line; overflow-wrap: anywhere; }
+.burbuja span { align-self: flex-end; font-size: 11px; opacity: 0.7; font-variant-numeric: tabular-nums; }
+.burbuja.mia { align-self: flex-end; background: var(--accion-500); color: #fff; border-bottom-right-radius: 6px; }
+.burbuja.suya { align-self: flex-start; background: var(--superficie-000); border: 1px solid var(--borde-100); border-bottom-left-radius: 6px; }
+.hilo-escribir {
+  position: sticky; bottom: 0; display: flex; gap: 8px; align-items: flex-end;
+  margin: 0 calc(-1 * max(16px, env(safe-area-inset-left, 0px))) -28px; padding: 10px 16px calc(14px + env(safe-area-inset-bottom, 0px));
+  background: var(--superficie-000); border-top: 1px solid var(--borde-100);
+}
+.hilo-escribir textarea { flex: 1; min-height: 46px; max-height: 120px; resize: none; padding: 12px 14px; border-radius: 22px; border: 1px solid var(--borde-200); background: var(--superficie-100); font: inherit; font-size: 15px; color: var(--tinta-900); }
+.hilo-escribir .btn { width: auto; padding: 0 18px; min-height: 46px; border-radius: 22px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.punto-nuevo { width: 9px; height: 9px; border-radius: 999px; background: var(--azul-500); flex: none; }

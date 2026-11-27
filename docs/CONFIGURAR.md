@@ -33,6 +33,7 @@ Cuando la app crece, llega un archivo nuevo en `supabase/migrations/` con el nú
 | `0003_equipo_con_cuentas.sql` | Barberos con cuenta propia: solicitud para unirse a la barbería y permisos (el encargado cambia precios y horarios; el barbero, solo su perfil) |
 | `0004_fotos_e_insights.sql` | Foto de perfil del barbero, portada de la barbería y la fecha de Nura Insights |
 | `0005_bot_whatsapp.sql` | La fecha hasta la que cada barbería tiene pagado el bot de WhatsApp |
+| `0006_vacantes_y_chat.sql` | Vacantes de trabajo (solo para barberos) y chat en vivo con horario, como complementos |
 
 Si la app muestra listas vacías o la página pública sin trabajos después de una actualización, lo más probable es que falte correr el archivo nuevo.
 
@@ -201,3 +202,19 @@ Supabase, **Table Editor**, tabla **salones**, columna **bot_hasta**: la fecha h
 ### Costos de Meta
 
 Contestar a quien te escribe primero (que es lo que hace el bot) no tiene costo hasta 1,000 mensajes al mes por número; desde el mensaje 1,001 Meta cobra cada uno, y pide tener un método de pago registrado. Una reserva completa usa unos 6 mensajes del bot, así que el tramo gratis alcanza para unas 160 reservas al mes entre todas las barberías. Revisa la tabla de precios de Meta antes de cobrar más barberías.
+
+## Complementos: vacantes y chat en vivo
+
+Se activan igual que Insights y el bot: en Supabase, **Table Editor**, tabla **salones**, escribe la fecha hasta la que pagó.
+
+| Complemento | Columna | Precio propuesto |
+| --- | --- | --- |
+| Nura Insights | `insights_hasta` | $149 al mes |
+| Bot de WhatsApp | `bot_hasta` | $199 al mes |
+| Vacantes | `vacantes_hasta` | $99 al mes |
+| Chat en vivo | `chat_hasta` | $149 al mes |
+
+Los precios de la pantalla viven en `src/lib/insights.ts`; si los cambias, cámbialos ahí.
+
+- **Vacantes:** el encargado publica en Cuenta, **Vacantes**. Solo las ven las cuentas de barbero o estilista (en Cuenta, **Vacantes**, o desde Únete a tu barbería). Las clientas nunca las ven.
+- **Chat en vivo:** el encargado elige los días y horas en Cuenta, **Chat en vivo**. Fuera de ese horario la clienta no puede escribir; el equipo sí puede contestar. Los mensajes llegan al momento gracias a Realtime de Supabase, que el archivo 0006 deja encendido para la tabla `mensajes` (si no, la app revisa cada 20 segundos).

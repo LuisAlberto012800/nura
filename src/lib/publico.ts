@@ -14,13 +14,18 @@ export type SalonPublico = {
   creado_en: string;
   portada_url: string | null;
   bot_hasta?: string | null;
+  chat_hasta?: string | null;
+  chat_inicio?: string;
+  chat_fin?: string;
+  chat_dias?: number[];
 };
 
 // Salón por su enlace. Lo ve cualquiera si está publicado; su equipo siempre.
 export async function salonPorSlug(slug: string) {
   const supabase = await crearClienteServidor();
   const columnas = "id, nombre, slug, colonia, direccion, whatsapp, descripcion, publicado, local_verificado_en, identidad_verificada_en, creado_en";
-  let { data, error } = await supabase.from("salones").select(`${columnas}, portada_url, bot_hasta`).eq("slug", slug).maybeSingle();
+  let { data, error } = await supabase.from("salones").select(`${columnas}, portada_url, bot_hasta, chat_hasta, chat_inicio, chat_fin, chat_dias`).eq("slug", slug).maybeSingle();
+  if (error) ({ data, error } = await supabase.from("salones").select(`${columnas}, portada_url, bot_hasta`).eq("slug", slug).maybeSingle());
   // Si todavía no se corre la actualización 0004, la página sigue funcionando sin portada.
   if (error) ({ data, error } = await supabase.from("salones").select(`${columnas}, portada_url`).eq("slug", slug).maybeSingle());
   if (error) ({ data, error } = await supabase.from("salones").select(columnas).eq("slug", slug).maybeSingle());

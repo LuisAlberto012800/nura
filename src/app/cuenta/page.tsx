@@ -94,6 +94,7 @@ export default async function Cuenta() {
           {fila("/negocio", "Negocio", "Nura Insights: dinero y clientes")}
           {fila("/bot", "Bot de WhatsApp", "Reservas por WhatsApp, solas")}
           {fila("/vacantes", "Vacantes", "Encuentra barberos para tu equipo")}
+          {fila("/mensajes", "Chat en vivo", "Tus clientes te escriben en tu horario")}
           {fila("/trabajos", "Portafolio", `${trabajos ?? 0} subidos · ${confirmados ?? 0} confirmados`)}
           {fila("/servicios", "Servicios y precios", `${servicios ?? 0} activos`)}
           {fila("/equipo", "Equipo y horarios", `${equipo ?? 0} ${equipo === 1 ? "persona" : "personas"}`)}
@@ -154,6 +155,15 @@ async function CuentaBarbero({ salonId, nombre, slug }: { salonId: string; nombr
               <span className="servicio-info">
                 <strong>Portafolio</strong>
                 <span className="meta">{trabajos ?? 0} subidos</span>
+              </span>
+              <Icono nombre="siguiente" tamano={16} />
+            </Link>
+          </li>
+          <li>
+            <Link href="/mensajes" className="fila-cliente">
+              <span className="servicio-info">
+                <strong>Mensajes</strong>
+                <span className="meta">Chat con los clientes de la barbería</span>
               </span>
               <Icono nombre="siguiente" tamano={16} />
             </Link>
