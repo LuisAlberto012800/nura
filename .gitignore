@@ -1,0 +1,32 @@
+# Dependencias
+node_modules/
+.pnpm-store/
+
+# Compilaciones
+.next/
+out/
+dist/
+build/
+.vercel/
+.expo/
+
+# Llaves y variables de entorno: nunca se suben
+.env
+.env.*
+!.env.example
+
+# Supabase local
+supabase/.temp/
+supabase/.branches/
+
+# Respaldos descargados de la app (traen datos de clientes)
+respaldos/
+*.backup.json
+
+# Sistema y editores
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.log
+npm-debug.log*
