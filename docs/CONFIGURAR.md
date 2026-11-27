@@ -24,21 +24,34 @@ Este archivo se corre una sola vez.
 
 ## 3. Copiar las dos llaves
 
-En Supabase entra a **Project Settings** y luego a **API** (puede llamarse **Data API** o **API Keys**). Necesitas dos datos:
+Son dos datos que le dicen a la app **dónde** está tu base de datos y **con qué llave** puede entrar. Los copias de Supabase y los pegas en Vercel.
 
-| En Supabase | Nombre que lleva en Vercel |
+| Dato | Qué es | Cómo se ve |
+| --- | --- | --- |
+| Project URL | La dirección de tu base de datos | `https://abcd1234.supabase.co` |
+| Llave pública | La llave de la puerta principal. Es pública a propósito: lo que protege los datos son las reglas de la base de datos | Empieza con `sb_publishable_` o, si se llama **anon public**, con `eyJ` |
+
+**La forma más fácil de encontrarlos:** en tu proyecto de Supabase, toca el botón **Connect** de arriba, elige **App Frameworks** y luego **Next.js**. Ahí aparecen los dos datos juntos.
+
+**Si no ves ese botón:** entra a **Project Settings** (el engrane abajo a la izquierda). La dirección está en **Data API** y la llave en **API Keys**.
+
+**Nunca copies la llave `secret` ni la `service_role`.** Esas saltan todas las reglas de seguridad.
+
+En Vercel, al importar el proyecto, abre **Environment Variables** y agrega dos renglones. En **Key** va el nombre y en **Value** el dato:
+
+| Key | Value |
 | --- | --- |
-| Project URL, algo como `https://abcd1234.supabase.co` | `NEXT_PUBLIC_SUPABASE_URL` |
-| La llave **anon public**. Si en su lugar ves **Publishable key** (empieza con `sb_publishable_`), usa esa | `NEXT_PUBLIC_SUPABASE_ANON_KEY` |
+| `NEXT_PUBLIC_SUPABASE_URL` | Tu Project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Tu llave pública |
 
-**Nunca uses la llave `service_role` ni la `secret`.** Esas saltan todas las reglas de seguridad.
+Si Supabase te muestra la llave con otro nombre, como `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, también funciona: la app acepta los dos.
 
 ## 4. Publicar en Vercel
 
 1. En vercel.com toca **Add New** y luego **Project**.
 2. Busca el repositorio **nura** y toca **Import**. Si no aparece, toca la opción para ajustar los permisos de GitHub y dale acceso solo a `nura`.
 3. Vercel detecta solo que es **Next.js**. No cambies nada de la compilación.
-4. Abre **Environment Variables** y agrega las dos llaves del paso 3, con los nombres exactos de la tabla.
+4. Abre **Environment Variables** y agrega los dos renglones del paso 3.
 5. Toca **Deploy** y espera uno o dos minutos.
 6. Copia la dirección que te da Vercel, algo como `https://nura-xxxx.vercel.app`.
 
