@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { BarraBarberia } from "@/components/BarraBarberia";
 import { Icono } from "@/components/Iconos";
@@ -46,9 +47,9 @@ export default async function Hoy() {
   ]);
   const primerNombre = (yo?.nombre ?? "").split(" ")[0];
 
-  const pendientes = [
+  const pendientes: { hecho: boolean; texto: string; href?: string }[] = [
     { hecho: true, texto: "Datos de tu barbería" },
-    { hecho: servicios > 0, texto: "Servicios y precios" },
+    { hecho: servicios > 0, texto: "Servicios y precios", href: "/servicios" },
     { hecho: trabajos >= 3, texto: "Tus primeros 3 trabajos" },
     { hecho: false, texto: "Equipo y horarios" },
   ];
@@ -102,8 +103,20 @@ export default async function Hoy() {
                 >
                   <Icono nombre={p.hecho ? "check" : "reloj"} tamano={15} grosor={2.2} />
                 </span>
-                <span style={{ flex: 1, color: p.hecho ? "var(--tinta-400)" : "var(--tinta-900)" }}>{p.texto}</span>
-                {!p.hecho && <span className="meta">Próximamente</span>}
+                {p.href ? (
+                  <Link href={p.href} className="pendiente-enlace">
+                    <span style={{ color: p.hecho ? "var(--tinta-400)" : "var(--tinta-900)" }}>{p.texto}</span>
+                    <span style={{ color: "var(--accion-500)", display: "inline-flex" }}>
+                      {!p.hecho && <span style={{ fontSize: 13, fontWeight: 700, marginRight: 2 }}>Agregar</span>}
+                      <Icono nombre="siguiente" tamano={18} />
+                    </span>
+                  </Link>
+                ) : (
+                  <>
+                    <span style={{ flex: 1, color: p.hecho ? "var(--tinta-400)" : "var(--tinta-900)" }}>{p.texto}</span>
+                    {!p.hecho && <span className="meta">Próximamente</span>}
+                  </>
+                )}
               </li>
             ))}
           </ul>

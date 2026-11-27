@@ -9,6 +9,8 @@ const TRAZOS = {
   check: "M5 12.5l4.2 4.2L19 7",
   reloj: "M12 3.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17zM12 7.5V12l3 2",
   candado: "M5 10.5h14v9.5H5zM8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5",
+  atras: "M15 5l-7 7 7 7",
+  siguiente: "M9 5l7 7-7 7",
 } as const;
 
 export type NombreIcono = keyof typeof TRAZOS;
