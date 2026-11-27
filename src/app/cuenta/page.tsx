@@ -94,7 +94,8 @@ export default async function Cuenta() {
           {fila("/trabajos", "Portafolio", `${trabajos ?? 0} subidos · ${confirmados ?? 0} confirmados`)}
           {fila("/servicios", "Servicios y precios", `${servicios ?? 0} activos`)}
           {fila("/equipo", "Equipo y horarios", `${equipo ?? 0} ${equipo === 1 ? "persona" : "personas"}`)}
-          {fila("/cuenta/datos", "Datos de tu barbería", "Nombre, dirección, WhatsApp")}
+          {fila("/cuenta/perfil", "Mi perfil", "Tu foto, especialidades y años de oficio")}
+          {fila("/cuenta/datos", "Datos de tu barbería", "Portada, nombre, dirección, WhatsApp")}
         </ul>
 
         <a className="btn btn-sec" href="/api/respaldo" download>
@@ -118,23 +119,29 @@ export default async function Cuenta() {
 // Precios, horarios y datos de la barbería los maneja el encargado.
 async function CuentaBarbero({ salonId, nombre, slug }: { salonId: string; nombre: string; slug: string }) {
   const { supabase, user } = await contextoBarberia();
-  const { data: yo } = await supabase.from("estilistas").select("id, nombre").eq("salon_id", salonId).eq("usuario_id", user.id).maybeSingle();
+  const { data: yo } = await supabase.from("estilistas").select("id, nombre, foto_url").eq("salon_id", salonId).eq("usuario_id", user.id).maybeSingle();
   const { count: trabajos } = yo
     ? await supabase.from("trabajos").select("id", { count: "exact", head: true }).eq("salon_id", salonId).eq("estilista_id", yo.id)
     : { count: 0 };
   return (
     <main className="pantalla">
       <div className="contenido">
-        <div>
-          <h1 className="titulo">{yo?.nombre ?? "Tu cuenta"}</h1>
-          <p className="subtitulo">Barbero en {nombre}</p>
+        <div className="fila" style={{ gap: 14 }}>
+          <Link href="/cuenta/perfil" className="avatar-foto" style={{ width: 64, height: 64 }} aria-label="Cambiar mi foto">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            {yo?.foto_url ? <img src={yo.foto_url} alt="" /> : <span className="avatar" style={{ width: 64, height: 64 }}>{(yo?.nombre ?? "N").charAt(0).toUpperCase()}</span>}
+          </Link>
+          <div style={{ minWidth: 0 }}>
+            <h1 className="titulo" style={{ fontSize: 24 }}>{yo?.nombre ?? "Tu cuenta"}</h1>
+            <p className="subtitulo" style={{ margin: 0 }}>Barbero en {nombre}</p>
+          </div>
         </div>
         <ul className="lista-servicios">
           <li>
             <Link href="/cuenta/perfil" className="fila-cliente">
               <span className="servicio-info">
                 <strong>Mi perfil</strong>
-                <span className="meta">Nombre, especialidades y tu horario</span>
+                <span className="meta">Tu foto, especialidades y tu horario</span>
               </span>
               <Icono nombre="siguiente" tamano={16} />
             </Link>

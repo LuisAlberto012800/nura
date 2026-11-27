@@ -1,7 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { contextoBarberia } from "@/lib/sesion";
+import { contextoBarberia, contextoEncargado } from "@/lib/sesion";
+import { borrarFoto, fotoDelSalon } from "@/lib/fotos";
 import { limpiarTelefono } from "@/lib/salon";
 
 export type EstadoDatos = { error?: string; ok?: boolean };
@@ -38,4 +39,16 @@ export async function guardarDatos(_: EstadoDatos, form: FormData): Promise<Esta
   if (error) return { error: "No pudimos guardar. Intenta de nuevo." };
   revalidatePath("/", "layout");
   return { ok: true };
+}
+
+// Foto de portada de la barbería, como en Facebook o LinkedIn.
+export async function guardarPortada(url: string | null): Promise<{ error?: string }> {
+  const { supabase, salon } = await contextoEncargado();
+  if (url && !fotoDelSalon(url, salon.id)) return { error: "La foto no se subió bien. Vuelve a elegirla." };
+  const { data: antes } = await supabase.from("salones").select("portada_url").eq("id", salon.id).single();
+  const { error } = await supabase.from("salones").update({ portada_url: url }).eq("id", salon.id);
+  if (error) return { error: "No pudimos guardar la portada. Intenta de nuevo." };
+  if (antes?.portada_url && antes.portada_url !== url) await borrarFoto(supabase, salon.id, antes.portada_url);
+  revalidatePath("/", "layout");
+  return {};
 }

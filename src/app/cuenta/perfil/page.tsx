@@ -6,6 +6,8 @@ import { contextoBarberia } from "@/lib/sesion";
 import { DIAS, horaCorta } from "@/lib/horarios";
 import { FormularioPerfil } from "./FormularioPerfil";
 import { SalirBarberia } from "./SalirBarberia";
+import { FotoSubible } from "@/components/FotoSubible";
+import { guardarMiFoto } from "./acciones";
 
 export const metadata = { title: "Mi perfil · Nura" };
 export const dynamic = "force-dynamic";
@@ -15,7 +17,7 @@ export default async function MiPerfil() {
   const { supabase, user, salon } = await contextoBarberia();
   const { data: yo } = await supabase
     .from("estilistas")
-    .select("id, nombre, especialidades, anios_oficio, horarios(dia, inicio, fin)")
+    .select("id, nombre, especialidades, anios_oficio, foto_url, horarios(dia, inicio, fin)")
     .eq("salon_id", salon.id)
     .eq("usuario_id", user.id)
     .maybeSingle();
@@ -31,6 +33,10 @@ export default async function MiPerfil() {
         <h1 className="titulo">Mi perfil</h1>
         {yo ? (
           <>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
+              <FotoSubible salonId={salon.id} carpeta="perfil" forma="circulo" actual={yo.foto_url} inicial={yo.nombre.charAt(0).toUpperCase()} guardar={guardarMiFoto} />
+              <span className="meta">Sale en la página de {salon.nombre} y junto a tus trabajos.</span>
+            </div>
             <FormularioPerfil nombre={yo.nombre} especialidades={yo.especialidades ?? []} anios={yo.anios_oficio} />
             <section className="tarjeta" aria-labelledby="mi-horario">
               <h2 id="mi-horario" className="etiqueta">Mi horario</h2>

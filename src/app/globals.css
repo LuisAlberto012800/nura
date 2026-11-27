@@ -733,3 +733,18 @@ button.bloque { border: 0; text-align: left; font: inherit; cursor: pointer; ali
 .estado-trabajo.apagado { color: var(--tinta-400); } .estado-trabajo.apagado i { background: var(--borde-200); }
 .tarjeta.resumen-miniatura { flex-direction: row; align-items: center; }
 .hora-chip:not(.activo) { background: var(--superficie-000); }
+
+/* ---------- Fotos de perfil y portada ---------- */
+.foto-subible { display: flex; flex-direction: column; gap: 8px; }
+.foto-subible-boton { position: relative; padding: 0; border: 0; cursor: pointer; background: var(--superficie-200); color: var(--tinta-600); font: inherit; overflow: visible; }
+.foto-subible-boton img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.foto-subible.circulo .foto-subible-boton { width: 96px; height: 96px; border-radius: 999px; }
+.foto-subible.circulo .foto-subible-boton img { border-radius: 999px; }
+.foto-subible.circulo .inicial { display: flex; width: 100%; height: 100%; align-items: center; justify-content: center; border-radius: 999px; background: var(--accion-100); color: var(--accion-700); font-size: 36px; font-weight: 800; }
+.foto-subible.portada .foto-subible-boton { width: 100%; aspect-ratio: 16 / 7; border-radius: 20px; overflow: hidden; }
+.foto-subible.portada .vacia { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; height: 100%; font-size: 14px; font-weight: 700; border: 1.5px dashed var(--borde-200); border-radius: 20px; box-sizing: border-box; }
+.insignia-camara { position: absolute; right: 2px; bottom: 2px; width: 32px; height: 32px; border-radius: 999px; background: var(--accion-500); color: #fff; display: flex; align-items: center; justify-content: center; border: 3px solid var(--superficie-100); }
+.foto-subible.portada .insignia-camara { right: 10px; bottom: 10px; }
+.cargando { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(29,21,17,0.5); color: #fff; font-size: 13px; font-weight: 700; border-radius: inherit; }
+.avatar-foto { flex: none; width: 40px; height: 40px; border-radius: 999px; overflow: hidden; background: var(--superficie-200); }
+.avatar-foto img { width: 100%; height: 100%; object-fit: cover; display: block; }

@@ -19,6 +19,7 @@ type Estilista = {
   especialidades: string[];
   activo: boolean;
   usuario_id: string | null;
+  foto_url: string | null;
   horarios: { dia: number; inicio: string; fin: string }[];
 };
 
@@ -42,7 +43,7 @@ export default async function Equipo() {
   const [{ data }, { data: dSolicitudes }] = await Promise.all([
     supabase
       .from("estilistas")
-      .select("id, nombre, especialidades, activo, usuario_id, horarios(dia, inicio, fin)")
+      .select("id, nombre, especialidades, activo, usuario_id, foto_url, horarios(dia, inicio, fin)")
       .eq("salon_id", salon.id)
       .order("creado_en"),
     supabase.from("solicitudes").select("id, nombre, creado_en").eq("salon_id", salon.id).eq("estado", "pendiente").order("creado_en"),
@@ -102,6 +103,14 @@ export default async function Equipo() {
         <ul className="lista-servicios">
           {equipo.map((e) => (
             <li key={e.id} className={e.activo ? undefined : "oculto"}>
+              {e.foto_url ? (
+                <span className="avatar-foto">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={e.foto_url} alt="" />
+                </span>
+              ) : (
+                <span className="avatar avatar-sm">{e.nombre.charAt(0).toUpperCase()}</span>
+              )}
               <Link href={`/equipo/${e.id}`} className="servicio-info">
                 <strong>
                   {e.nombre}

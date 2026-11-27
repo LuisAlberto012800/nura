@@ -27,7 +27,7 @@ type Trabajo = {
   estilista: { nombre: string } | null;
 };
 type Servicio = { id: string; nombre: string; duracion_min: number; precio: number; categoria: string };
-type Estilista = { id: string; nombre: string; especialidades: string[]; anios_oficio: number | null; horarios: { dia: number }[] };
+type Estilista = { id: string; nombre: string; especialidades: string[]; anios_oficio: number | null; foto_url: string | null; horarios: { dia: number }[] };
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
@@ -52,7 +52,7 @@ export default async function PaginaSalon({ params, searchParams }: { params: Pr
       .order("creado_en", { ascending: false })
       .limit(60),
     supabase.from("servicios").select("id, nombre, duracion_min, precio, categoria").eq("salon_id", salon.id).eq("activo", true).order("orden").order("creado_en"),
-    supabase.from("estilistas").select("id, nombre, especialidades, anios_oficio, horarios(dia)").eq("salon_id", salon.id).eq("activo", true).order("creado_en"),
+    supabase.from("estilistas").select("id, nombre, especialidades, anios_oficio, foto_url, horarios(dia)").eq("salon_id", salon.id).eq("activo", true).order("creado_en"),
   ]);
   const todos = (dTrabajos ?? []) as unknown as Trabajo[];
   const servicios = (dServicios ?? []) as Servicio[];
@@ -65,7 +65,7 @@ export default async function PaginaSalon({ params, searchParams }: { params: Pr
   const hoy = diaSemana(hoyLocal());
   const atiendenHoy = equipo.filter((e) => e.horarios.some((h) => h.dia === hoy)).length;
   const anios = Math.max(0, ...equipo.map((e) => e.anios_oficio ?? 0));
-  const portada = todos[0]?.foto_despues;
+  const portada = salon.portada_url ?? todos[0]?.foto_despues;
   const puedeReservar = servicios.length > 0 && equipo.some((e) => e.horarios.length > 0);
 
   return (
@@ -190,7 +190,14 @@ export default async function PaginaSalon({ params, searchParams }: { params: Pr
             <ul className="filas">
               {equipo.map((e) => (
                 <li key={e.id} className="fila-precio" style={{ justifyContent: "flex-start" }}>
-                  <span className="avatar avatar-sm">{e.nombre.charAt(0).toUpperCase()}</span>
+                  {e.foto_url ? (
+                    <span className="avatar-foto" style={{ width: 48, height: 48 }}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={e.foto_url} alt={e.nombre} />
+                    </span>
+                  ) : (
+                    <span className="avatar avatar-sm" style={{ width: 48, height: 48 }}>{e.nombre.charAt(0).toUpperCase()}</span>
+                  )}
                   <p style={{ flex: 1, minWidth: 0 }}>
                     {e.nombre}
                     {(e.especialidades.length > 0 || e.anios_oficio != null) && (

@@ -26,7 +26,7 @@ type Trabajo = {
   medalla_cliente: number | null;
   nombre_publico: string | null;
   servicio: { id: string; nombre: string; precio: number } | null;
-  estilista: { id: string; nombre: string; anios_oficio: number | null } | null;
+  estilista: { id: string; nombre: string; anios_oficio: number | null; foto_url: string | null } | null;
   salon: { nombre: string; slug: string; colonia: string; whatsapp: string | null; local_verificado_en: string | null; identidad_verificada_en: string | null } | null;
 };
 
@@ -36,7 +36,7 @@ async function cargar(id: string) {
   const { data } = await supabase
     .from("trabajos")
     .select(
-      "id, titulo, foto_despues, foto_antes, tipo_cabello, categoria, duracion_min, colonia, confirmacion, medalla_cliente, nombre_publico, servicio:servicios(id, nombre, precio), estilista:estilistas(id, nombre, anios_oficio), salon:salones(nombre, slug, colonia, whatsapp, local_verificado_en, identidad_verificada_en)",
+      "id, titulo, foto_despues, foto_antes, tipo_cabello, categoria, duracion_min, colonia, confirmacion, medalla_cliente, nombre_publico, servicio:servicios(id, nombre, precio), estilista:estilistas(id, nombre, anios_oficio, foto_url), salon:salones(nombre, slug, colonia, whatsapp, local_verificado_en, identidad_verificada_en)",
     )
     .eq("id", id)
     .eq("publicado", true)
@@ -112,9 +112,16 @@ export default async function DetalleTrabajo({ params }: { params: Promise<{ id:
         </div>
 
         <Link href={`/b/${t.salon.slug}`} className="fila-autor">
-          <span className="avatar-espejo">
-            <Espejo tamano={22} />
-          </span>
+          {t.estilista?.foto_url ? (
+            <span className="avatar-foto" style={{ width: 42, height: 42 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={t.estilista.foto_url} alt="" />
+            </span>
+          ) : (
+            <span className="avatar-espejo">
+              <Espejo tamano={22} />
+            </span>
+          )}
           <span style={{ flex: 1, minWidth: 0 }}>
             <strong>
               {t.estilista?.nombre ?? t.salon.nombre}

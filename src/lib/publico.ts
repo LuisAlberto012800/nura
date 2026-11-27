@@ -12,6 +12,7 @@ export type SalonPublico = {
   local_verificado_en: string | null;
   identidad_verificada_en: string | null;
   creado_en: string;
+  portada_url: string | null;
 };
 
 // Salón por su enlace. Lo ve cualquiera si está publicado; su equipo siempre.
@@ -19,7 +20,7 @@ export async function salonPorSlug(slug: string) {
   const supabase = await crearClienteServidor();
   const { data } = await supabase
     .from("salones")
-    .select("id, nombre, slug, colonia, direccion, whatsapp, descripcion, publicado, local_verificado_en, identidad_verificada_en, creado_en")
+    .select("id, nombre, slug, colonia, direccion, whatsapp, descripcion, publicado, local_verificado_en, identidad_verificada_en, creado_en, portada_url")
     .eq("slug", slug)
     .maybeSingle();
   return { supabase, salon: data as SalonPublico | null };
