@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useState, useTransition, type FormEvent } from "react";
 import { DIAS, HORAS, type DiaHorario } from "@/lib/horarios";
 import { guardarEstilista, type EstadoEquipo } from "./acciones";
 
@@ -15,14 +15,24 @@ export function FormularioEstilista({
   horario: DiaHorario[];
   esSugerido: boolean;
 }) {
-  const [estado, accion, enviando] = useActionState<EstadoEquipo, FormData>(guardarEstilista, {});
+  const [estado, accion, guardando] = useActionState<EstadoEquipo, FormData>(guardarEstilista, {});
+  const [enTransicion, iniciar] = useTransition();
+  const enviando = guardando || enTransicion;
   const [dias, setDias] = useState(horario);
+
+  // Se envía a mano para que React no reinicie el formulario al terminar:
+  // ese reinicio regresaba los interruptores a como estaban al abrir la pantalla.
+  const enviar = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const datos = new FormData(e.currentTarget);
+    iniciar(() => accion(datos));
+  };
 
   const cambiar = (dia: number, cambio: Partial<DiaHorario>) =>
     setDias((actual) => actual.map((d) => (d.dia === dia ? { ...d, ...cambio } : d)));
 
   return (
-    <form action={accion} style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+    <form onSubmit={enviar} style={{ display: "flex", flexDirection: "column", gap: 18 }}>
       <input type="hidden" name="id" value={estilista.id} />
 
       <section className="tarjeta" aria-labelledby="datos">
@@ -39,7 +49,7 @@ export function FormularioEstilista({
             defaultValue={estilista.especialidades.join(", ")}
             placeholder="Color, balayage, rizos"
           />
-          <small>Sepáralas con comas. Aparecen en su perfil.</small>
+          <small>Opcional. Sepáralas con comas; aparecen en su perfil.</small>
         </label>
         <label className="campo">
           <span>Años de oficio</span>
@@ -50,6 +60,7 @@ export function FormularioEstilista({
             pattern="[0-9]*"
             defaultValue={estilista.anios_oficio ?? ""}
           />
+          <small>Opcional. Déjalo vacío si está empezando.</small>
         </label>
       </section>
 

@@ -10,15 +10,7 @@ export function FormularioNuevo() {
       <label className="campo">
         <span>Nombre</span>
         <input id="nuevo_nombre" name="nombre" autoComplete="off" placeholder="Iván Mora" required />
-      </label>
-      <label className="campo">
-        <span>Especialidades</span>
-        <input id="nuevo_especialidades" name="especialidades" placeholder="Fade, barba, corte en capas" />
-        <small>Opcional. Sepáralas con comas.</small>
-      </label>
-      <label className="campo">
-        <span>Años de oficio</span>
-        <input id="nuevo_anios" name="anios_oficio" inputMode="numeric" pattern="[0-9]*" placeholder="5" />
+        <small>Después podrás agregar sus especialidades y su horario.</small>
       </label>
       {estado.error && <p className="aviso aviso-error" role="alert">{estado.error}</p>}
       <button className="btn" type="submit" disabled={enviando}>
