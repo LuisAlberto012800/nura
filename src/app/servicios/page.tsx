@@ -38,9 +38,9 @@ export default async function Servicios() {
           <p className="subtitulo">Lo que ven tus clientas en tu página, con su precio y duración.</p>
         </div>
 
-        <p className="aviso aviso-neutro" style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
+        <p className="aviso aviso-accion" style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
           <Icono nombre="candado" tamano={18} />
-          <span>En Nura no existe &quot;desde $X&quot;. El precio que pongas es el que ve la clienta.</span>
+          <span>En Nura no existe “desde $X”. El precio que pongas es el que ve la clienta.</span>
         </p>
 
         {servicios.length > 0 ? (

@@ -5,8 +5,8 @@ import { Espejo, Logo } from "@/components/Logo";
 import { SinConfigurar } from "@/components/SinConfigurar";
 import { supabaseConfigurado } from "@/lib/supabase/config";
 import { crearClienteServidor } from "@/lib/supabase/server";
-import { CATEGORIAS, pesos } from "@/lib/formato";
-import { Medalla } from "@/components/Medalla";
+import { CATEGORIAS } from "@/lib/formato";
+import { TarjetaTrabajo } from "@/components/TarjetaTrabajo";
 import { medallaSalon, medallaTrabajo } from "@/lib/medallas";
 
 export const metadata = { title: "Descubrir · Nura" };
@@ -89,23 +89,18 @@ export default async function Descubrir({ searchParams }: { searchParams: Promis
           </span>
         </div>
 
-        <nav className="chips-equipo" aria-label="Tipo de cabello">
-          <Link href={enlace({ cabello: "todos" })} className={`chip${!cabello ? " activo" : ""}`}>
+        <nav className="chips-equipo" aria-label="Filtrar">
+          <Link href={enlace({ cabello: "todos", servicio: undefined })} className={`chip${!cabello && !servicio ? " activo" : ""}`}>
             Todos
           </Link>
           {CABELLOS.map((c) => (
-            <Link key={c.valor} href={enlace({ cabello: c.valor })} className={`chip${cabello === c.valor ? " activo" : ""}`}>
+            <Link key={c.valor} href={enlace({ cabello: cabello === c.valor ? "todos" : c.valor })} className={`chip${cabello === c.valor ? " activo" : ""}`}>
               {c.texto}
             </Link>
           ))}
-        </nav>
-        <nav className="chips-equipo" aria-label="Servicio">
+          <span className="separador-chips" aria-hidden="true" />
           {CATEGORIAS.map((c) => (
-            <Link
-              key={c.valor}
-              href={enlace({ servicio: servicio === c.valor ? undefined : c.valor })}
-              className={`chip chip-suave${servicio === c.valor ? " activo" : ""}`}
-            >
+            <Link key={c.valor} href={enlace({ servicio: servicio === c.valor ? undefined : c.valor })} className={`chip${servicio === c.valor ? " activo" : ""}`}>
               {c.texto}
             </Link>
           ))}
@@ -123,24 +118,11 @@ export default async function Descubrir({ searchParams }: { searchParams: Promis
             {columnas.map((col, c) => (
               <div key={c} className="feed-col">
                 {col.map((t, i) => (
-                  <Link key={t.id} href={t.salon ? `/b/${t.salon.slug}` : "#"} className="tarjeta-trabajo">
-                    <div className="foto" style={{ height: ALTOS[(i * 2 + c) % ALTOS.length] }}>
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={t.foto_despues} alt={t.titulo ?? t.servicio?.nombre ?? "Trabajo"} loading="lazy" />
-                      {t.foto_antes && <span className="sello">Antes / Después</span>}
-                    </div>
-                    <div className="cuerpo">
-                      <span className="autor">{t.estilista ? `${t.estilista.nombre.split(" ")[0]} · ${t.salon?.nombre}` : t.salon?.nombre}</span>
-                      <div className="fila-separada" style={{ gap: 6, alignItems: "baseline" }}>
-                        <strong>{t.titulo ?? t.servicio?.nombre ?? CATEGORIAS.find((x) => x.valor === t.categoria)?.texto}</strong>
-                        {t.servicio && <span className="precio" style={{ fontSize: 14 }}>{pesos(t.servicio.precio)}</span>}
-                      </div>
-                      <span className="meta">
-                        {CABELLOS.find((x) => x.valor === t.tipo_cabello)?.texto} · {t.colonia}
-                      </span>
-                      {t.salon && <Medalla nivel={medallaTrabajo(medallaSalon(t.salon), t.medalla_cliente, t.confirmacion)} compacta />}
-                    </div>
-                  </Link>
+                  <TarjetaTrabajo
+                    key={t.id}
+                    alto={ALTOS[(i * 2 + c) % ALTOS.length]}
+                    t={{ ...t, salonNombre: t.salon?.nombre, nivel: t.salon ? medallaTrabajo(medallaSalon(t.salon), t.medalla_cliente, t.confirmacion) : 0 }}
+                  />
                 ))}
               </div>
             ))}

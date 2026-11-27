@@ -38,7 +38,7 @@ export default async function Tu() {
               {nombre.includes("@") ? "Tu cuenta" : nombre.split(" ")[0]}
             </h1>
             <p className="meta" style={{ margin: 0, overflow: "hidden", textOverflow: "ellipsis" }}>
-              {user.email}
+              Guadalajara
             </p>
           </div>
         </div>
@@ -59,12 +59,23 @@ export default async function Tu() {
           </div>
         </section>
 
-        <div className="tarjeta" style={{ padding: "4px 16px" }}>
-          <Link href="/alta" className="fila-separada" style={{ padding: "12px 0", color: "var(--accion-500)", textDecoration: "none", fontWeight: 700 }}>
-            Tengo barbería o estética
-            <Icono nombre="siguiente" tamano={18} />
-          </Link>
-        </div>
+        <ul className="filas tarjeta" style={{ padding: "0 16px", gap: 0 }}>
+          <li>
+            <Link href="/alta" className="fila-precio" style={{ color: "var(--accion-500)" }}>
+              <p>Soy estilista: abrir cuenta profesional</p>
+              <Icono nombre="siguiente" tamano={16} />
+            </Link>
+          </li>
+          <li>
+            <Link href="/unirme" className="fila-precio">
+              <p>
+                Trabajo en una barbería
+                <small>Únete a su equipo en Nura</small>
+              </p>
+              <Icono nombre="siguiente" tamano={16} />
+            </Link>
+          </li>
+        </ul>
 
         <form action={salir}>
           <button type="submit" className="btn btn-texto" style={{ color: "var(--tinta-600)" }}>

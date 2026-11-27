@@ -82,7 +82,7 @@ export function FormularioTrabajo({
     return `${SUPABASE_URL}/storage/v1/object/public/trabajos/${ruta}`;
   };
 
-  const faltante = !despues ? "Agrega la foto de después" : !servicio ? "Elige el servicio" : !cabello ? "Elige el tipo de cabello" : colonia.trim().length < 2 ? "Escribe la colonia" : null;
+  const faltante = !despues ? "Falta la foto de después" : !servicio ? "Falta el servicio" : !cabello ? "Falta el tipo de cabello" : colonia.trim().length < 2 ? "Falta la colonia" : null;
 
   const enviar = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -113,18 +113,6 @@ export function FormularioTrabajo({
       <input type="hidden" name="muestra_cara" value={cara ? "si" : "no"} />
 
       <div className="fotos-subir">
-        <button type="button" className={`foto-subir principal${despues ? " con-foto" : ""}`} onClick={() => entradaDespues.current?.click()}>
-          {despues ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={despues.vista} alt="Foto de después" />
-          ) : (
-            <>
-              <Icono nombre="camara" tamano={30} />
-              <strong>Foto de después</strong>
-              <span>Toca para tomarla o elegirla</span>
-            </>
-          )}
-        </button>
         <button type="button" className={`foto-subir${antes ? " con-foto" : ""}`} onClick={() => entradaAntes.current?.click()}>
           {antes ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -132,10 +120,24 @@ export function FormularioTrabajo({
           ) : (
             <>
               <Icono nombre="mas" tamano={22} />
-              <span>Antes</span>
+              <strong>Antes</strong>
               <small>opcional</small>
             </>
           )}
+          {antes && <span className="etiqueta-foto">Antes</span>}
+        </button>
+        <button type="button" className={`foto-subir requerida${despues ? " con-foto" : ""}`} onClick={() => entradaDespues.current?.click()}>
+          {despues ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={despues.vista} alt="Foto de después" />
+          ) : (
+            <>
+              <Icono nombre="camara" tamano={26} />
+              <strong>Después</strong>
+              <small>toca para tomarla</small>
+            </>
+          )}
+          {despues && <span className="etiqueta-foto despues">Después</span>}
         </button>
         <input ref={entradaDespues} type="file" accept="image/*" hidden onChange={(e) => tomarFoto(e, setDespues)} />
         <input ref={entradaAntes} type="file" accept="image/*" hidden onChange={(e) => tomarFoto(e, setAntes)} />
@@ -163,7 +165,7 @@ export function FormularioTrabajo({
       <section className="tarjeta" aria-labelledby="datos-trabajo">
         <h2 id="datos-trabajo" className="etiqueta">Datos</h2>
         <label className="campo">
-          <span>Servicio</span>
+          <span className="con-obligatorio">Servicio <em>Obligatorio</em></span>
           <select value={servicioId} onChange={(e) => setServicioId(e.target.value)}>
             {servicios.map((s) => (
               <option key={s.id} value={s.id}>
@@ -173,7 +175,7 @@ export function FormularioTrabajo({
           </select>
         </label>
         <div className="campo">
-          <span>Tipo de cabello</span>
+          <span className="con-obligatorio">Tipo de cabello <em>Obligatorio</em></span>
           <div className="opciones-cabello cuatro">
             {CABELLOS.map((c) => (
               <button key={c.valor} type="button" className={`opcion-cabello${cabello === c.valor ? " activo" : ""}`} aria-pressed={cabello === c.valor} onClick={() => setCabello(c.valor)}>
@@ -195,7 +197,7 @@ export function FormularioTrabajo({
           </div>
         )}
         <label className="campo">
-          <span>Colonia</span>
+          <span className="con-obligatorio">Colonia <em>Obligatorio</em></span>
           <input name="colonia" value={colonia} onChange={(e) => setColonia(e.target.value)} />
         </label>
         <label className="fila-separada interruptor-fila">
@@ -207,9 +209,13 @@ export function FormularioTrabajo({
         </label>
       </section>
 
+      <p className="meta" style={{ margin: 0, fontSize: 12 }}>
+        Sin la foto de después, el servicio, el tipo de cabello y la colonia, el trabajo no se publica. Es lo que hace que aparezca a quien tiene un cabello como el de tu cliente.
+      </p>
+
       {error && <p className="aviso aviso-error" role="alert">{error}</p>}
 
-      <div className="accion-fija">
+      <div className="accion-fija con-barra">
         <button className="btn" type="submit" disabled={ocupado || !!faltante}>
           {subiendo ? "Subiendo foto…" : ocupado ? "Guardando…" : faltante ?? (cara ? "Guardar" : "Publicar")}
         </button>

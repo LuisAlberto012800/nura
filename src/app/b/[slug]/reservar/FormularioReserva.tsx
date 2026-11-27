@@ -12,6 +12,7 @@ type Servicio = { id: string; nombre: string; duracion_min: number; precio: numb
 type Estilista = { id: string; nombre: string; horarios: Turno[] };
 
 const EN_PLURAL = ["los domingos", "los lunes", "los martes", "los miércoles", "los jueves", "los viernes", "los sábados"];
+const MESES_LARGOS = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 const MESES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
 
 export function FormularioReserva({
@@ -24,6 +25,9 @@ export function FormularioReserva({
   hoy,
   ahora,
   servicioInicial,
+  estilistaInicial,
+  fotos,
+  colonia,
 }: {
   slug: string;
   salonId: string;
@@ -34,15 +38,19 @@ export function FormularioReserva({
   hoy: string;
   ahora: number;
   servicioInicial?: string;
+  estilistaInicial?: string;
+  fotos: Record<string, string>;
+  colonia: string;
 }) {
   const { estado, enviar, enviando } = useFormulario<EstadoReserva>(reservarCita, {});
   const [servicioId, setServicioId] = useState(servicios.some((s) => s.id === servicioInicial) ? servicioInicial! : "");
-  const [estilistaId, setEstilistaId] = useState(equipo.length === 1 ? equipo[0].id : "");
+  const [estilistaId, setEstilistaId] = useState(equipo.length === 1 ? equipo[0].id : (equipo.find((e) => e.id === estilistaInicial)?.id ?? ""));
   const [dia, setDia] = useState("");
   const [hora, setHora] = useState("");
   const [aviso, setAviso] = useState<string | null>(null);
   const [visto, setVisto] = useState<EstadoReserva | null>(null);
   const servicio = servicios.find((s) => s.id === servicioId);
+  const [eligiendo, setEligiendo] = useState(!servicio);
   const estilista = equipo.find((e) => e.id === estilistaId);
 
   const trabaja = (d: string) => !!estilista && turnosDelDia(estilista.horarios, d).length > 0;
@@ -84,22 +92,50 @@ export function FormularioReserva({
       <input type="hidden" name="dia" value={dia} />
       <input type="hidden" name="hora" value={hora} />
 
-      <section className="tarjeta" aria-labelledby="paso-servicio">
-        <h2 id="paso-servicio" className="etiqueta">Servicio</h2>
-        <div className="lista-opciones">
-          {servicios.map((s) => (
-            <button key={s.id} type="button" className={`opcion-fila opcion-servicio${servicioId === s.id ? " activo" : ""}`} aria-pressed={servicioId === s.id} onClick={() => setServicioId(s.id)}>
-              <span>
-                {s.nombre}
-                <small>{duracionTexto(s.duracion_min)}</small>
-              </span>
-              <strong>{pesos(s.precio)}</strong>
-            </button>
-          ))}
+      {servicio && !eligiendo ? (
+        <div className="tarjeta resumen-miniatura">
+          <span className="mini">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            {fotos[servicio.id] && <img src={fotos[servicio.id]} alt="" />}
+          </span>
+          <span style={{ flex: 1, minWidth: 0 }}>
+            <p style={{ fontSize: 15, fontWeight: 800 }}>{servicio.nombre}</p>
+            {estilista && <p style={{ fontSize: 13, color: "var(--tinta-600)", marginTop: 3 }}>Con {estilista.nombre}</p>}
+            <p className="meta" style={{ fontSize: 12, marginTop: 3 }}>
+              {duracionTexto(servicio.duracion_min)} · {colonia}
+            </p>
+          </span>
+          <button type="button" className="btn-texto" style={{ minHeight: 44, border: 0, background: "none", font: "inherit", fontWeight: 700, cursor: "pointer" }} onClick={() => setEligiendo(true)}>
+            Cambiar
+          </button>
         </div>
-      </section>
+      ) : (
+        <section className="tarjeta" aria-labelledby="paso-servicio">
+          <h2 id="paso-servicio" className="etiqueta">Servicio</h2>
+          <div className="lista-opciones">
+            {servicios.map((s) => (
+              <button
+                key={s.id}
+                type="button"
+                className={`opcion-fila opcion-servicio${servicioId === s.id ? " activo" : ""}`}
+                aria-pressed={servicioId === s.id}
+                onClick={() => {
+                  setServicioId(s.id);
+                  setEligiendo(false);
+                }}
+              >
+                <span>
+                  {s.nombre}
+                  <small>{duracionTexto(s.duracion_min)}</small>
+                </span>
+                <strong>{pesos(s.precio)}</strong>
+              </button>
+            ))}
+          </div>
+        </section>
+      )}
 
-      {servicio && equipo.length > 1 && (
+      {servicio && !eligiendo && equipo.length > 1 && (
         <section className="tarjeta" aria-labelledby="paso-quien">
           <h2 id="paso-quien" className="etiqueta">Con quién</h2>
           <div className="chips-equipo">
@@ -112,13 +148,12 @@ export function FormularioReserva({
         </section>
       )}
 
-      {servicio && estilista && (
-        <section className="tarjeta" aria-labelledby="paso-cuando">
-          <div className="fila-separada" style={{ alignItems: "baseline" }}>
-            <h2 id="paso-cuando" className="etiqueta">Cuándo</h2>
-            {dia && <span className="meta">{fechaLarga(dia)}</span>}
-          </div>
-          <div className="tira-elegir" ref={tira} role="group" aria-label="Elegir día">
+      {servicio && !eligiendo && estilista && (
+        <section aria-labelledby="paso-cuando" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <h2 id="paso-cuando" className="etiqueta">
+            {dia ? MESES_LARGOS[Number(dia.slice(5, 7)) - 1] : "Cuándo"}
+          </h2>
+          <div className="tira-elegir dias-grandes" ref={tira} role="group" aria-label="Elegir día">
             {dias.map((d, i) => {
               const { corto, numero } = etiquetaDia(d);
               const abre = trabaja(d);
@@ -133,16 +168,39 @@ export function FormularioReserva({
           </div>
           {dia &&
             (libres.length > 0 ? (
-              <div className="horas-libres" role="group" aria-label="Horas libres">
+              <>
+              <h3 className="etiqueta" style={{ marginTop: 6 }}>Horarios libres el {fechaLarga(dia).split(",")[0].toLowerCase()}</h3>
+              <div className="horas-libres tres" role="group" aria-label="Horas libres">
                 {libres.map((h) => (
                   <button key={h} type="button" className={`hora-chip${h === hora ? " activo" : ""}`} aria-pressed={h === hora} onClick={() => setHora(h)}>
                     {h}
                   </button>
                 ))}
               </div>
+              </>
             ) : (
               <p className="aviso aviso-neutro" style={{ margin: 0 }}>Ya no hay horas libres este día. Prueba otro.</p>
             ))}
+        </section>
+      )}
+
+      {listo && (
+        <section className="tarjeta" aria-label="Precio">
+          <div className="desglose">
+            <div>
+              <span>{servicio.nombre}</span>
+              <b>{pesos(servicio.precio)}</b>
+            </div>
+            <div>
+              <span>Cargo por usar Nura</span>
+              <b className="cero">$0</b>
+            </div>
+            <div className="total">
+              <span>Total</span>
+              <b>{pesos(servicio.precio)}</b>
+            </div>
+          </div>
+          <span className="meta" style={{ fontSize: 12 }}>Precio exacto. Pagas directamente en la barbería.</span>
         </section>
       )}
 
@@ -163,7 +221,7 @@ export function FormularioReserva({
 
       <div className="accion-fija">
         <button className="btn" type="submit" disabled={!listo || enviando}>
-          {enviando ? "Apartando…" : listo ? `Reservar · ${pesos(servicio.precio)}` : !servicio ? "Elige un servicio" : !estilista ? "Elige con quién" : "Elige una hora"}
+          {enviando ? "Apartando…" : listo ? `Confirmar · ${fechaLarga(dia).split(",")[0].toLowerCase()} ${Number(dia.slice(8))}, ${hora}` : !servicio || eligiendo ? "Elige un servicio" : !estilista ? "Elige con quién" : "Elige una hora"}
         </button>
       </div>
 

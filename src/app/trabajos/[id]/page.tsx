@@ -67,7 +67,7 @@ export default async function DetalleTrabajo({ params, searchParams }: { params:
       <div className="contenido">
         <Link href="/trabajos" className="volver">
           <Icono nombre="atras" tamano={18} />
-          Mis trabajos
+          Portafolio
         </Link>
 
         {sp.nuevo && (

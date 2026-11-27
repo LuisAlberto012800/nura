@@ -6,7 +6,7 @@ import { SinConfigurar } from "@/components/SinConfigurar";
 import { supabaseConfigurado } from "@/lib/supabase/config";
 import { contextoBarberia } from "@/lib/sesion";
 import { pesos } from "@/lib/formato";
-import { aInstante, diaLocal, etiquetaDia, fechaLarga, horaLocal, hoyLocal, sumarDias } from "@/lib/tiempo";
+import { aInstante, diaLocal, diaSemana, etiquetaDia, fechaLarga, horaLocal, hoyLocal, sumarDias } from "@/lib/tiempo";
 import { cambiarEstado } from "../agenda/acciones";
 
 type Cita = {
@@ -65,6 +65,22 @@ export default async function Hoy() {
       : Promise.resolve({ data: [] as { id: string; nombre: string }[] }),
   ]);
   const solicitudes = (dSolicitudes ?? []) as { id: string; nombre: string }[];
+
+  // Esta semana (de lunes a hoy): citas completadas, lo cobrado y clientes nuevos.
+  const lunes = sumarDias(hoy, -((diaSemana(hoy) + 6) % 7));
+  const [{ data: dSemana }, { count: nuevos }] = await Promise.all([
+    supabase
+      .from("citas")
+      .select("precio")
+      .eq("salon_id", salon.id)
+      .match(mias)
+      .eq("estado", "completada")
+      .gte("inicio", aInstante(lunes, "00:00"))
+      .lt("inicio", aInstante(sumarDias(hoy, 1), "00:00")),
+    supabase.from("clientes").select("id", { count: "exact", head: true }).eq("salon_id", salon.id).gte("creado_en", aInstante(lunes, "00:00")),
+  ]);
+  const semana = (dSemana ?? []) as { precio: number | null }[];
+  const cobradoSemana = semana.reduce((t, c) => t + (c.precio ?? 0), 0);
   const [servicios, horarios, trabajos] = conteos;
   const citasHoy = (datosHoy ?? []) as unknown as Cita[];
   const porConfirmar = (datosPorConfirmar ?? []) as unknown as Cita[];
@@ -179,6 +195,26 @@ export default async function Hoy() {
             <p className="meta" style={{ margin: 0 }}>No tienes citas hoy.</p>
           )}
         </section>
+
+        {(semana.length > 0 || (nuevos ?? 0) > 0) && (
+          <section aria-labelledby="semana" style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            <h2 id="semana" className="etiqueta">Esta semana</h2>
+            <div className="estadisticas">
+              <div>
+                <strong>{semana.length}</strong>
+                <span>{semana.length === 1 ? "cita completada" : "citas completadas"}</span>
+              </div>
+              <div>
+                <strong>{pesos(cobradoSemana)}</strong>
+                <span>cobrado</span>
+              </div>
+              <div>
+                <strong>{nuevos ?? 0}</strong>
+                <span>{nuevos === 1 ? "cliente nuevo" : "clientes nuevos"}</span>
+              </div>
+            </div>
+          </section>
+        )}
 
         {salon.rol === "dueno" && listos < pendientes.length && (
           <section className="tarjeta" aria-labelledby="pendientes">

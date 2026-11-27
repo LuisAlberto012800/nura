@@ -57,7 +57,7 @@ export default async function Subir({ searchParams }: { searchParams: Promise<Re
         <div className="fila-separada">
           <h1 className="titulo">Subir trabajo</h1>
           <Link href="/trabajos" className="meta" style={{ color: "var(--accion-500)", fontWeight: 700, textDecoration: "none" }}>
-            Ver mis trabajos
+            Ver portafolio
           </Link>
         </div>
         {!servicios || servicios.length === 0 ? (

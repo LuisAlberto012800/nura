@@ -91,7 +91,7 @@ export default async function Cuenta() {
         </section>
 
         <ul className="lista-servicios">
-          {fila("/trabajos", "Mis trabajos", `${trabajos ?? 0} subidos · ${confirmados ?? 0} confirmados`)}
+          {fila("/trabajos", "Portafolio", `${trabajos ?? 0} subidos · ${confirmados ?? 0} confirmados`)}
           {fila("/servicios", "Servicios y precios", `${servicios ?? 0} activos`)}
           {fila("/equipo", "Equipo y horarios", `${equipo ?? 0} ${equipo === 1 ? "persona" : "personas"}`)}
           {fila("/cuenta/datos", "Datos de tu barbería", "Nombre, dirección, WhatsApp")}
@@ -142,7 +142,7 @@ async function CuentaBarbero({ salonId, nombre, slug }: { salonId: string; nombr
           <li>
             <Link href="/trabajos" className="fila-cliente">
               <span className="servicio-info">
-                <strong>Mis trabajos</strong>
+                <strong>Portafolio</strong>
                 <span className="meta">{trabajos ?? 0} subidos</span>
               </span>
               <Icono nombre="siguiente" tamano={16} />

@@ -19,6 +19,7 @@ import {
   sumarDias,
 } from "@/lib/tiempo";
 import { cambiarEstado, quitarBloqueo } from "./acciones";
+import { duracionTexto } from "@/lib/formato";
 import { BloqueCita } from "./BloqueCita";
 
 export const metadata = { title: "Agenda · Nura" };
@@ -124,6 +125,26 @@ export default async function Agenda({ searchParams }: { searchParams: Promise<R
   const y = (m: number) => ((m - inicioVista) / 30) * ALTO_MEDIA_HORA;
 
   const dias = Array.from({ length: 7 }, (_, i) => sumarDias(hoy, i));
+  // Puntito bajo los días que ya tienen citas.
+  const { data: dSemana } = await supabase
+    .from("citas")
+    .select("inicio")
+    .eq("salon_id", salon.id)
+    .eq("estilista_id", estilista.id)
+    .in("estado", ["por_confirmar", "confirmada"])
+    .gte("inicio", aInstante(hoy, "00:00"))
+    .lt("inicio", aInstante(sumarDias(hoy, 7), "00:00"));
+  const conCitas = new Set(((dSemana ?? []) as { inicio: string }[]).map((c) => new Intl.DateTimeFormat("en-CA", { timeZone: "America/Mexico_City" }).format(new Date(c.inicio))));
+
+  // Cuánto tiempo libre le queda ese día dentro de su horario.
+  let libres = 0;
+  if (horario) {
+    for (let m = aMinutos(horario.inicio); m < aMinutos(horario.fin); m += 30) {
+      const ocupado = [...citas, ...bloqueos].some((c) => minutosDe(c.inicio) < m + 30 && (minutosDe(c.fin) || 24 * 60) > m);
+      if (!ocupado) libres += 30;
+    }
+  }
+  const textoLibre = libres === 0 ? "sin horas libres" : `${duracionTexto(libres)} libres`;
   // Los días pasados se pueden consultar, pero no agendar.
   const pasado = dia < hoy;
   const diaParaAgendar = pasado ? hoy : dia;
@@ -160,6 +181,7 @@ export default async function Agenda({ searchParams }: { searchParams: Promise<R
               >
                 <span>{d === hoy ? "Hoy" : corto}</span>
                 <strong>{numero}</strong>
+                <i className={`punto-dia${conCitas.has(d) ? " lleno" : ""}`} aria-hidden="true" />
               </Link>
             );
           })}
@@ -203,7 +225,7 @@ export default async function Agenda({ searchParams }: { searchParams: Promise<R
           {pasado
             ? "Este día ya pasó. Puedes consultarlo, pero las citas nuevas son de hoy en adelante."
             : horario
-            ? `${estilista.nombre.split(" ")[0]} atiende de ${horario.inicio.slice(0, 5)} a ${horario.fin.slice(0, 5)}. Toca una hora libre para agendar.`
+            ? `${estilista.nombre.split(" ")[0]} atiende de ${horario.inicio.slice(0, 5)} a ${horario.fin.slice(0, 5)} · ${textoLibre}. Toca una hora libre para agendar.`
             : `${estilista.nombre.split(" ")[0]} descansa este día. No se pueden agendar citas.`}
         </p>
 
