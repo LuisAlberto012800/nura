@@ -565,3 +565,15 @@ button.bloque { border: 0; text-align: left; font: inherit; cursor: pointer; ali
 .listo-check.espera { background: var(--azul-100); color: var(--azul-700); }
 .enlace-unirme { flex-direction: row; align-items: center; justify-content: space-between; text-decoration: none; color: inherit; }
 .enlace-unirme > span { display: flex; flex-direction: column; gap: 2px; }
+
+/* ---------- Importar ---------- */
+.archivo-subir { aspect-ratio: auto; min-height: 180px; }
+.mapa-columnas { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.mapa-columnas .campo select { min-height: 46px; font-size: 14px; }
+.lista-vista { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; }
+.lista-vista li { display: flex; flex-direction: column; gap: 2px; padding: 9px 0; border-bottom: 1px solid var(--borde-100); }
+.lista-vista li:last-child { border-bottom: 0; }
+.permiso { align-items: flex-start; gap: 10px; font-size: 14px; color: var(--tinta-600); cursor: pointer; }
+.permiso input { width: 20px; height: 20px; margin-top: 1px; accent-color: var(--accion-500); flex: none; }
+.barra-avance { width: 100%; height: 8px; border-radius: 999px; background: var(--superficie-200); overflow: hidden; }
+.barra-avance span { display: block; height: 100%; background: var(--azul-500); transition: width .2s; }

@@ -42,9 +42,16 @@ export default async function Clientes({ searchParams }: { searchParams: Promise
       <div className="contenido">
         <div className="fila-separada">
           <h1 className="titulo">Clientes</h1>
-          <Link href="/clientes/nuevo" className="boton-icono boton-accion" aria-label="Nuevo cliente">
-            <Icono nombre="mas" tamano={20} />
-          </Link>
+          <div className="fila" style={{ gap: 8 }}>
+            {salon.rol === "dueno" && (
+              <Link href="/clientes/importar" className="boton-icono" aria-label="Importar clientes desde un archivo">
+                <Icono nombre="compartir" tamano={18} />
+              </Link>
+            )}
+            <Link href="/clientes/nuevo" className="boton-icono boton-accion" aria-label="Nuevo cliente">
+              <Icono nombre="mas" tamano={20} />
+            </Link>
+          </div>
         </div>
 
         {(total ?? 0) > 0 && (
@@ -91,9 +98,14 @@ export default async function Clientes({ searchParams }: { searchParams: Promise
           <div className="tarjeta vacio">
             <Icono nombre="clientes" tamano={36} />
             <strong>Aún no tienes clientes.</strong>
-            <p>Se agregan solos cuando agendas o cuando alguien reserva en tu página. También puedes agregarlos tú.</p>
-            <Link href="/clientes/nuevo" className="btn">
-              Agregar cliente
+            <p>Se agregan solos cuando agendas o cuando alguien reserva en tu página. También puedes traerlos de tu agenda anterior.</p>
+            {salon.rol === "dueno" && (
+              <Link href="/clientes/importar" className="btn">
+                Importar desde mi agenda anterior
+              </Link>
+            )}
+            <Link href="/clientes/nuevo" className={salon.rol === "dueno" ? "btn btn-sec" : "btn"}>
+              Agregar uno por uno
             </Link>
           </div>
         ) : (
