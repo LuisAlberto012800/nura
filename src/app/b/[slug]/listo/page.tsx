@@ -25,6 +25,8 @@ export default async function Listo({ params, searchParams }: { params: Promise<
   const dia = fechaLarga(sp.d).split(",")[0];
   const cuando = `${fechaLarga(sp.d).toLowerCase()} a las ${sp.h}`;
   const nombre = (sp.n ?? "").slice(0, 40);
+  const codigo = (sp.c ?? "").replace(/[^A-Z0-9]/g, "").slice(0, 20);
+  const total = servicio && codigo && /^\d+$/.test(sp.t ?? "") ? Math.min(servicio.precio, Number(sp.t)) : servicio?.precio;
   const mapa = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${salon.direccion ? `${salon.direccion}, ` : ""}${salon.colonia}, Guadalajara`)}`;
 
   return (
@@ -62,10 +64,17 @@ export default async function Listo({ params, searchParams }: { params: Promise<
             {salon.direccion ? `${salon.direccion} · ` : ""}
             {salon.colonia}
           </span>
-          {servicio && (
+          {servicio && total != null && (
             <div className="fila-separada" style={{ borderTop: "1px solid var(--borde-100)", paddingTop: 12 }}>
-              <span style={{ fontSize: 14, color: "var(--tinta-600)" }}>Pagas en la barbería</span>
-              <span className="precio" style={{ fontSize: 18 }}>{pesos(servicio.precio)}</span>
+              <span style={{ fontSize: 14, color: "var(--tinta-600)" }}>
+                Pagas en la barbería
+                {total < servicio.precio && (
+                  <small style={{ display: "block", fontSize: 12, color: "var(--exito-500)", fontWeight: 700 }}>
+                    Cupón {codigo}: antes {pesos(servicio.precio)}
+                  </small>
+                )}
+              </span>
+              <span className="precio" style={{ fontSize: 18 }}>{pesos(total)}</span>
             </div>
           )}
         </div>

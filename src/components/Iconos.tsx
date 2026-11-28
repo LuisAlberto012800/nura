@@ -19,6 +19,8 @@ const TRAZOS = {
   compartir: "M12 4v11M7.5 8.5L12 4l4.5 4.5M5 13v6h14v-6",
   foto: "M4 5h16v14H4zM4 15l4.5-4.5 4 4 2.5-2.5L20 17M15.5 9.5a1 1 0 1 0 0-.01",
   basura: "M5 7h14M10 7V4.5h4V7M7 7l1 13h8l1-13",
+  menu: "M4 7h16M4 12h16M4 17h16",
+  cerrar: "M6 6l12 12M18 6L6 18",
 } as const;
 
 export type NombreIcono = keyof typeof TRAZOS;

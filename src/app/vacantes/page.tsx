@@ -27,6 +27,10 @@ export default async function Vacantes() {
   return (
     <main className="pantalla">
       <div className="contenido">
+        <Link href="/complementos" className="volver">
+          <Icono nombre="atras" tamano={18} />
+          Complementos
+        </Link>
         <div>
           <h1 className="titulo">Vacantes</h1>
           <p className="subtitulo">{activo ? "Solo los barberos con cuenta en Nura las ven y se postulan." : "Encuentra barberos para tu equipo."}</p>
@@ -77,10 +81,6 @@ export default async function Vacantes() {
             </section>
           </>
         )}
-        <Link href="/cuenta" className="volver" style={{ alignSelf: "center" }}>
-          <Icono nombre="atras" tamano={16} />
-          Cuenta
-        </Link>
       </div>
       <BarraBarberia activa="cuenta" />
     </main>

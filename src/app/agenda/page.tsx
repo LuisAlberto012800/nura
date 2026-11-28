@@ -1,11 +1,9 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { BarraBarberia } from "@/components/BarraBarberia";
 import { Icono } from "@/components/Iconos";
 import { SinConfigurar } from "@/components/SinConfigurar";
 import { supabaseConfigurado } from "@/lib/supabase/config";
-import { sesionActual } from "@/lib/sesion";
-import { salonDelUsuario } from "@/lib/salon";
+import { contextoBarberia } from "@/lib/sesion";
 import {
   aInstante,
   aMinutos,
@@ -48,10 +46,7 @@ const ESTADO_TEXTO: Record<Cita["estado"], string> = {
 export default async function Agenda({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
   if (!supabaseConfigurado) return <SinConfigurar />;
   const sp = await searchParams;
-  const { supabase, user } = await sesionActual();
-  if (!user) redirect("/entrar");
-  const salon = await salonDelUsuario(supabase, user.id);
-  if (!salon) redirect("/alta");
+  const { supabase, user, salon } = await contextoBarberia();
 
   const hoy = hoyLocal();
   const dia = esDiaValido(sp.dia) ? sp.dia : hoy;

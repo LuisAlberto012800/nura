@@ -6,7 +6,7 @@ import { useFormulario } from "@/lib/useFormulario";
 import { duracionTexto, pesos } from "@/lib/formato";
 import { aMinutos, diaSemana, etiquetaDia, fechaLarga } from "@/lib/tiempo";
 import { horasLibres, turnosDelDia, type Ocupado, type Turno } from "@/lib/disponibilidad";
-import { reservarCita, type EstadoReserva } from "./acciones";
+import { reservarCita, revisarCupon, type EstadoReserva } from "./acciones";
 
 type Servicio = { id: string; nombre: string; duracion_min: number; precio: number };
 type Estilista = { id: string; nombre: string; horarios: Turno[] };
@@ -28,6 +28,7 @@ export function FormularioReserva({
   estilistaInicial,
   fotos,
   colonia,
+  cuponInicial,
 }: {
   slug: string;
   salonId: string;
@@ -41,6 +42,7 @@ export function FormularioReserva({
   estilistaInicial?: string;
   fotos: Record<string, string>;
   colonia: string;
+  cuponInicial?: string;
 }) {
   const { estado, enviar, enviando } = useFormulario<EstadoReserva>(reservarCita, {});
   const [servicioId, setServicioId] = useState(servicios.some((s) => s.id === servicioInicial) ? servicioInicial! : "");
@@ -52,6 +54,30 @@ export function FormularioReserva({
   const servicio = servicios.find((s) => s.id === servicioId);
   const [eligiendo, setEligiendo] = useState(!servicio);
   const estilista = equipo.find((e) => e.id === estilistaId);
+  const [codigo, setCodigo] = useState((cuponInicial ?? "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 20));
+  const [cupon, setCupon] = useState<{ codigo: string; descuento: number; final: number } | null>(null);
+  const [errorCupon, setErrorCupon] = useState<string | null>(null);
+  const [revisando, setRevisando] = useState(false);
+  const [abrirCupon, setAbrirCupon] = useState(!!cuponInicial);
+
+  const aplicar = async (texto = codigo) => {
+    if (!servicioId || !texto) return;
+    setRevisando(true);
+    const r = await revisarCupon(salonId, servicioId, texto);
+    setRevisando(false);
+    if ("error" in r) {
+      setCupon(null);
+      setErrorCupon(r.error);
+    } else {
+      setCupon(r);
+      setErrorCupon(null);
+    }
+  };
+  // El descuento depende del servicio: se vuelve a revisar si cambia.
+  useEffect(() => {
+    if (cupon || (cuponInicial && codigo)) aplicar(cupon?.codigo ?? codigo);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [servicioId]);
 
   const trabaja = (d: string) => !!estilista && turnosDelDia(estilista.horarios, d).length > 0;
   useEffect(() => {
@@ -91,6 +117,7 @@ export function FormularioReserva({
       <input type="hidden" name="estilista_id" value={estilistaId} />
       <input type="hidden" name="dia" value={dia} />
       <input type="hidden" name="hora" value={hora} />
+      <input type="hidden" name="cupon" value={cupon?.codigo ?? ""} />
 
       {servicio && !eligiendo ? (
         <div className="tarjeta resumen-miniatura">
@@ -191,16 +218,57 @@ export function FormularioReserva({
               <span>{servicio.nombre}</span>
               <b>{pesos(servicio.precio)}</b>
             </div>
+            {cupon && (
+              <div className="descuento">
+                <span>Cupón {cupon.codigo}</span>
+                <b>−{pesos(cupon.descuento)}</b>
+              </div>
+            )}
             <div>
               <span>Cargo por usar Nura</span>
               <b className="cero">$0</b>
             </div>
             <div className="total">
               <span>Total</span>
-              <b>{pesos(servicio.precio)}</b>
+              <b>{pesos(cupon ? cupon.final : servicio.precio)}</b>
             </div>
           </div>
           <span className="meta" style={{ fontSize: 12 }}>Precio exacto. Pagas directamente en la barbería.</span>
+          {cupon ? (
+              <button type="button" className="btn-texto enlace-cupon" onClick={() => { setCupon(null); setCodigo(""); }}>
+                Quitar cupón
+              </button>
+            ) : abrirCupon ? (
+              <div className="campo-cupon">
+                <label htmlFor="codigo-cupon">Código del cupón</label>
+                <div className="fila" style={{ gap: 8 }}>
+                  <input
+                    id="codigo-cupon"
+                    value={codigo}
+                    onChange={(e) => {
+                      setCodigo(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 20));
+                      setErrorCupon(null);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        aplicar();
+                      }
+                    }}
+                    autoCapitalize="characters"
+                    placeholder="CORTE20"
+                  />
+                  <button type="button" className="btn btn-sec" disabled={!codigo || revisando} onClick={() => aplicar()}>
+                    {revisando ? "…" : "Aplicar"}
+                  </button>
+                </div>
+                {errorCupon && <small role="alert">{errorCupon}</small>}
+              </div>
+            ) : (
+              <button type="button" className="btn-texto enlace-cupon" onClick={() => setAbrirCupon(true)}>
+                ¿Tienes un cupón?
+              </button>
+            )}
         </section>
       )}
 

@@ -34,6 +34,7 @@ Cuando la app crece, llega un archivo nuevo en `supabase/migrations/` con el nú
 | `0004_fotos_e_insights.sql` | Foto de perfil del barbero, portada de la barbería y la fecha de Nura Insights |
 | `0005_bot_whatsapp.sql` | La fecha hasta la que cada barbería tiene pagado el bot de WhatsApp |
 | `0006_vacantes_y_chat.sql` | Vacantes de trabajo (solo para barberos) y chat en vivo con horario, como complementos |
+| `0007_cupones.sql` | Cuponera: descuentos por servicio en porcentaje o en pesos, y la reserva que los aplica |
 
 Si la app muestra listas vacías o la página pública sin trabajos después de una actualización, lo más probable es que falte correr el archivo nuevo.
 
@@ -205,7 +206,7 @@ Contestar a quien te escribe primero (que es lo que hace el bot) no tiene costo 
 
 ## Complementos: vacantes y chat en vivo
 
-Se activan igual que Insights y el bot: en Supabase, **Table Editor**, tabla **salones**, escribe la fecha hasta la que pagó.
+Todos los complementos están juntos en **Menú, Complementos**: el encargado ve cuáles tiene activos, hasta cuándo y cuánto paga al mes. Se activan igual que Insights y el bot: en Supabase, **Table Editor**, tabla **salones**, escribe la fecha hasta la que pagó.
 
 | Complemento | Columna | Precio propuesto |
 | --- | --- | --- |
@@ -216,5 +217,11 @@ Se activan igual que Insights y el bot: en Supabase, **Table Editor**, tabla **s
 
 Los precios de la pantalla viven en `src/lib/insights.ts`; si los cambias, cámbialos ahí.
 
-- **Vacantes:** el encargado publica en Cuenta, **Vacantes**. Solo las ven las cuentas de barbero o estilista (en Cuenta, **Vacantes**, o desde Únete a tu barbería). Las clientas nunca las ven.
-- **Chat en vivo:** el encargado elige los días y horas en Cuenta, **Chat en vivo**. Fuera de ese horario la clienta no puede escribir; el equipo sí puede contestar. Los mensajes llegan al momento gracias a Realtime de Supabase, que el archivo 0006 deja encendido para la tabla `mensajes` (si no, la app revisa cada 20 segundos).
+- **Vacantes:** el encargado publica en Complementos, **Vacantes**. Solo las ven las cuentas de barbero o estilista (en Cuenta, **Vacantes**, o desde Únete a tu barbería). Las clientas nunca las ven.
+- **Chat en vivo:** el encargado elige los días y horas en Complementos, **Chat en vivo**. Fuera de ese horario la clienta no puede escribir; el equipo sí puede contestar. Los mensajes llegan al momento gracias a Realtime de Supabase, que el archivo 0006 deja encendido para la tabla `mensajes` (si no, la app revisa cada 20 segundos).
+
+## Cupones
+
+Son gratis para todas las barberías. El encargado los crea en **Menú, Cupones**: elige un servicio (o todos), si el descuento es en porcentaje o en pesos, y opcionalmente fecha de vencimiento y número de usos. Los cupones marcados "Mostrar en mi página" aparecen en la página pública con un botón **Usar**; los demás solo funcionan si la clienta escribe el código al reservar. La cita guarda el precio ya con descuento, y en la agenda se ve qué cupón usó.
+
+Para que funcionen, corre antes el archivo `0007_cupones.sql`. Sin él, la página y la reserva siguen funcionando, solo que el cupón no se aplica.

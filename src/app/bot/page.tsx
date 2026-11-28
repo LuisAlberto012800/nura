@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { BarraBarberia } from "@/components/BarraBarberia";
 import { BotonCopiar } from "@/components/BotonCopiar";
 import { Icono } from "@/components/Iconos";
@@ -27,6 +28,10 @@ export default async function Bot() {
   return (
     <main className="pantalla">
       <div className="contenido">
+        <Link href="/complementos" className="volver">
+          <Icono nombre="atras" tamano={18} />
+          Complementos
+        </Link>
         <div>
           <h1 className="titulo">Bot de WhatsApp</h1>
           <p className="subtitulo">{activo ? "Activo. Tus clientes ya pueden reservar por WhatsApp." : "Reservas por WhatsApp, solas, a cualquier hora."}</p>

@@ -61,6 +61,9 @@ export default async function DetalleCita({ params }: { params: Promise<{ id: st
     .maybeSingle();
   if (!data) notFound();
   const cita = data as unknown as Cita;
+  // Cupón aparte: si la migración 0007 aún no corre, la cita se ve igual.
+  const { data: conCupon } = await supabase.from("citas").select("descuento, cupon:cupones(codigo)").eq("id", id).maybeSingle();
+  const descuento = (conCupon as { descuento?: number; cupon?: { codigo: string } | null } | null) ?? null;
 
   const dia = diaLocal(cita.inicio);
   const minutos = aMinutos(horaLocal(cita.fin)) - aMinutos(horaLocal(cita.inicio));
@@ -121,6 +124,12 @@ export default async function DetalleCita({ params }: { params: Promise<{ id: st
             <span className="meta">Precio</span>
             <strong className="precio">{cita.precio != null ? pesos(cita.precio) : "Sin precio"}</strong>
           </div>
+          {!!descuento?.descuento && (
+            <div className="fila-separada">
+              <span className="meta">Cupón{descuento.cupon ? ` ${descuento.cupon.codigo}` : ""}</span>
+              <span style={{ color: "var(--exito-500)", fontWeight: 700 }}>−{pesos(descuento.descuento)} ya descontado</span>
+            </div>
+          )}
           {cita.notas && (
             <div className="fila-separada">
               <span className="meta">Nota</span>

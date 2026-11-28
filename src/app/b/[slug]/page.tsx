@@ -13,6 +13,7 @@ import { salonPorSlug } from "@/lib/publico";
 import { enlaceBot } from "@/lib/insights";
 import { estadoChat, type AjustesChat } from "@/lib/chat";
 import { diaSemana, hoyLocal } from "@/lib/tiempo";
+import { precioConCupon, textoDescuento, venceTexto, type Cupon } from "@/lib/cupones";
 
 export const dynamic = "force-dynamic";
 
@@ -45,7 +46,7 @@ export default async function PaginaSalon({ params, searchParams }: { params: Pr
   const { supabase, salon } = await salonPorSlug(slug);
   if (!salon) notFound();
 
-  const [{ data: dTrabajos }, { data: dServicios }, { data: dEquipo }] = await Promise.all([
+  const [{ data: dTrabajos }, { data: dServicios }, { data: dEquipo }, { data: dCupones }] = await Promise.all([
     supabase
       .from("trabajos")
       .select("id, foto_despues, foto_antes, tipo_cabello, categoria, confirmacion, medalla_cliente, nombre_publico, servicio:servicios(nombre, precio), estilista:estilistas(nombre)")
@@ -55,9 +56,12 @@ export default async function PaginaSalon({ params, searchParams }: { params: Pr
       .limit(60),
     supabase.from("servicios").select("id, nombre, duracion_min, precio, categoria").eq("salon_id", salon.id).eq("activo", true).order("orden").order("creado_en"),
     supabase.from("estilistas").select("id, nombre, especialidades, anios_oficio, foto_url, horarios(dia)").eq("salon_id", salon.id).eq("activo", true).order("creado_en"),
+    // Solo regresa cupones públicos y vigentes (lo cuidan las reglas de la base).
+    supabase.from("cupones").select("id, codigo, servicio_id, tipo, valor, vence").eq("salon_id", salon.id).order("creado_en", { ascending: false }).limit(6),
   ]);
   const todos = (dTrabajos ?? []) as unknown as Trabajo[];
   const servicios = (dServicios ?? []) as Servicio[];
+  const cupones = (dCupones ?? []) as Pick<Cupon, "id" | "codigo" | "servicio_id" | "tipo" | "valor" | "vence">[];
   const equipo = (dEquipo ?? []) as Estilista[];
   const confirmados = todos.filter((t) => t.confirmacion === "con_nombre" || t.confirmacion === "sin_nombre").length;
   const nivel = medallaSalon(salon, confirmados);
@@ -163,6 +167,44 @@ export default async function PaginaSalon({ params, searchParams }: { params: Pr
                 </Link>
               ))}
             </div>
+          </section>
+        )}
+
+        {cupones.length > 0 && puedeReservar && (
+          <section aria-labelledby="cupones" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            <div className="seccion-titulo">
+              <h2 id="cupones">Cupones</h2>
+            </div>
+            <ul className="lista-cupones">
+              {cupones.map((c) => {
+                const servicio = servicios.find((x) => x.id === c.servicio_id);
+                if (c.servicio_id && !servicio) return null;
+                const q = new URLSearchParams({ cupon: c.codigo, ...(servicio ? { servicio: servicio.id } : {}) });
+                return (
+                  <li key={c.id}>
+                    <Link href={`/b/${slug}/reservar?${q}`} className="cupon">
+                      <span className="cupon-cuerpo">
+                        <strong>{textoDescuento(c)}</strong>
+                        <span>
+                          {servicio ? (
+                            <>
+                              {servicio.nombre}: <s>{pesos(servicio.precio)}</s> {pesos(precioConCupon(servicio.precio, c))}
+                            </>
+                          ) : (
+                            "En cualquier servicio"
+                          )}
+                        </span>
+                        <span className="meta">
+                          Código <b className="cupon-codigo" style={{ fontSize: 13 }}>{c.codigo}</b>
+                          {c.vence ? ` · ${venceTexto(c.vence)}` : ""}
+                        </span>
+                      </span>
+                      <span className="cupon-usar">Usar</span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
           </section>
         )}
 

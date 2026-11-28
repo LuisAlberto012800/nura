@@ -54,6 +54,7 @@ export default async function Reservar({ params, searchParams }: { params: Promi
             estilistaInicial={sp.e}
             fotos={fotos}
             colonia={salon.colonia}
+            cuponInicial={sp.cupon}
           />
         )}
       </div>

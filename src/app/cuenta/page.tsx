@@ -91,10 +91,8 @@ export default async function Cuenta() {
         </section>
 
         <ul className="lista-servicios">
-          {fila("/negocio", "Negocio", "Nura Insights: dinero y clientes")}
-          {fila("/bot", "Bot de WhatsApp", "Reservas por WhatsApp, solas")}
-          {fila("/vacantes", "Vacantes", "Encuentra barberos para tu equipo")}
-          {fila("/mensajes", "Chat en vivo", "Tus clientes te escriben en tu horario")}
+          {fila("/complementos", "Complementos", "Insights, bot de WhatsApp, chat y vacantes")}
+          {fila("/cupones", "Cupones", "Descuentos en porcentaje o en pesos")}
           {fila("/trabajos", "Portafolio", `${trabajos ?? 0} subidos · ${confirmados ?? 0} confirmados`)}
           {fila("/servicios", "Servicios y precios", `${servicios ?? 0} activos`)}
           {fila("/equipo", "Equipo y horarios", `${equipo ?? 0} ${equipo === 1 ? "persona" : "personas"}`)}

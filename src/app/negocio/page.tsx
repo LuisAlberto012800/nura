@@ -79,6 +79,10 @@ export default async function Negocio({ searchParams }: { searchParams: Promise<
   return (
     <main className="pantalla">
       <div className="contenido">
+        <Link href="/complementos" className="volver">
+          <Icono nombre="atras" tamano={18} />
+          Complementos
+        </Link>
         <div>
           <h1 className="titulo">Negocio</h1>
           <p className="subtitulo">Nura Insights · solo lo ves tú</p>
@@ -172,6 +176,10 @@ function SinInsights() {
   return (
     <main className="pantalla">
       <div className="contenido">
+        <Link href="/complementos" className="volver">
+          <Icono nombre="atras" tamano={18} />
+          Complementos
+        </Link>
         <div>
           <h1 className="titulo">Nura Insights</h1>
           <p className="subtitulo">Los números de tu barbería, claros cada semana.</p>
