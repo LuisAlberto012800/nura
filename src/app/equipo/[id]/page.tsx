@@ -7,6 +7,7 @@ import { contextoEncargado } from "@/lib/sesion";
 import { DIAS, horaCorta, horarioSugerido, type DiaHorario } from "@/lib/horarios";
 import { cambiarActivo } from "../acciones";
 import { FormularioEstilista } from "../FormularioEstilista";
+import { BotonBaja } from "../MasBarbero";
 
 export const metadata = { title: "Estilista · Nura" };
 export const dynamic = "force-dynamic";
@@ -36,6 +37,12 @@ export default async function EditarEstilista({ params, searchParams }: { params
           : { dia: d.valor, atiende: false, inicio: "10:00", fin: "20:00" };
       });
   const esYo = estilista.usuario_id === user.id;
+  const { count: pendientes } = await supabase
+    .from("citas")
+    .select("id", { count: "exact", head: true })
+    .eq("estilista_id", estilista.id)
+    .in("estado", ["por_confirmar", "confirmada"])
+    .gte("inicio", new Date().toISOString());
 
   return (
     <main className="pantalla">
@@ -66,18 +73,19 @@ export default async function EditarEstilista({ params, searchParams }: { params
           esSugerido={esSugerido}
         />
 
-        {!esYo && (
-          <form action={cambiarActivo} style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        {!esYo && estilista.activo && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            <BotonBaja id={estilista.id} nombre={estilista.nombre} conCuenta={!!estilista.usuario_id} citas={pendientes ?? 0} />
+            <p className="meta">Deja de aparecer en la agenda y en tu página. Se conservan sus citas y trabajos.</p>
+          </div>
+        )}
+        {!esYo && !estilista.activo && (
+          <form action={cambiarActivo}>
             <input type="hidden" name="id" value={estilista.id} />
-            <input type="hidden" name="activo" value={String(estilista.activo)} />
-            <button type="submit" className={estilista.activo ? "btn btn-peligro" : "btn btn-sec"}>
-              {estilista.activo ? "Ya no trabaja aquí" : "Volver a activar"}
+            <input type="hidden" name="activo" value="false" />
+            <button type="submit" className="btn btn-sec">
+              Volver a activar
             </button>
-            <p className="meta">
-              {estilista.activo
-                ? `Deja de aparecer en la agenda y en tu página${estilista.usuario_id ? " y pierde el acceso a la app" : ""}. Se conservan sus citas y trabajos.`
-                : "Volverá a aparecer en la agenda y en tu página."}
-            </p>
           </form>
         )}
       </div>

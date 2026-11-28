@@ -5,10 +5,12 @@ import { SinConfigurar } from "@/components/SinConfigurar";
 import { supabaseConfigurado } from "@/lib/supabase/config";
 import { contextoEncargado } from "@/lib/sesion";
 import { urlBase } from "@/lib/url";
-import { BotonCopiar } from "@/components/BotonCopiar";
-import { responderSolicitud } from "./acciones";
+import { cambiarActivo, responderSolicitud } from "./acciones";
 import { DIAS, horaCorta } from "@/lib/horarios";
-import { FormularioNuevo } from "./FormularioNuevo";
+import { textoTurnos, turnosDelDia } from "@/lib/disponibilidad";
+import { aInstante, hoyLocal, sumarDias } from "@/lib/tiempo";
+import { AgregarBarbero } from "./AgregarBarbero";
+import { MasBarbero } from "./MasBarbero";
 
 export const metadata = { title: "Equipo y horarios · Nura" };
 export const dynamic = "force-dynamic";
@@ -39,31 +41,49 @@ function resumenHorario(h: Estilista["horarios"]): string {
 
 export default async function Equipo() {
   if (!supabaseConfigurado) return <SinConfigurar />;
-  const { supabase, salon } = await contextoEncargado();
-  const [{ data }, { data: dSolicitudes }] = await Promise.all([
+  const { supabase, salon, user } = await contextoEncargado();
+  const hoy = hoyLocal();
+  const [{ data }, { data: dSolicitudes }, { data: dCitas }] = await Promise.all([
     supabase
       .from("estilistas")
       .select("id, nombre, especialidades, activo, usuario_id, foto_url, horarios(dia, inicio, fin)")
       .eq("salon_id", salon.id)
       .order("creado_en"),
     supabase.from("solicitudes").select("id, nombre, creado_en").eq("salon_id", salon.id).eq("estado", "pendiente").order("creado_en"),
+    // Citas pendientes de cada quien (para la tarjeta y para avisar antes de dar de baja).
+    supabase
+      .from("citas")
+      .select("estilista_id, inicio")
+      .eq("salon_id", salon.id)
+      .in("estado", ["por_confirmar", "confirmada"])
+      .gte("inicio", new Date().toISOString())
+      .limit(2000),
   ]);
+  const finSemana = aInstante(sumarDias(hoy, 7), "00:00");
+  const pendientes = new Map<string, { total: number; semana: number }>();
+  for (const c of (dCitas ?? []) as { estilista_id: string; inicio: string }[]) {
+    const p = pendientes.get(c.estilista_id) ?? { total: 0, semana: 0 };
+    p.total += 1;
+    if (Date.parse(c.inicio) < Date.parse(finSemana)) p.semana += 1;
+    pendientes.set(c.estilista_id, p);
+  }
   const equipo = (data ?? []) as Estilista[];
   const solicitudes = (dSolicitudes ?? []) as { id: string; nombre: string }[];
   const sinCuenta = equipo.filter((e) => e.activo && !e.usuario_id);
+  const activos = equipo.filter((e) => e.activo);
+  const inactivos = equipo.filter((e) => !e.activo);
   const invitacion = `${await urlBase()}/unirme/${salon.slug}`;
 
   return (
     <main className="pantalla">
       <div className="contenido">
-        <Link href="/cuenta" className="volver">
-          <Icono nombre="atras" tamano={18} />
-          Cuenta
-        </Link>
         <div>
           <h1 className="titulo">Equipo y horarios</h1>
-          <p className="subtitulo">Quién atiende y cuándo. La agenda solo ofrece horarios dentro de estas horas.</p>
+          <p className="subtitulo">
+            {activos.length} {activos.length === 1 ? "barbero activo" : "barberos activos"}. La agenda solo ofrece horas dentro de su horario.
+          </p>
         </div>
+        <AgregarBarbero invitacion={invitacion} salon={salon.nombre} />
 
         {solicitudes.map((sol) => (
           <section key={sol.id} className="tarjeta tarjeta-azul" aria-label={`Solicitud de ${sol.nombre}`}>
@@ -100,52 +120,79 @@ export default async function Equipo() {
           </section>
         ))}
 
-        <ul className="lista-servicios">
-          {equipo.map((e) => (
-            <li key={e.id} className={e.activo ? undefined : "oculto"}>
-              {e.foto_url ? (
-                <span className="avatar-foto">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={e.foto_url} alt="" />
-                </span>
-              ) : (
-                <span className="avatar avatar-sm">{e.nombre.charAt(0).toUpperCase()}</span>
-              )}
-              <Link href={`/equipo/${e.id}`} className="servicio-info">
-                <strong>
-                  {e.nombre}
-                  {e.usuario_id && <span className="etiqueta-azul" style={{ marginLeft: 8, verticalAlign: "middle" }}>Con cuenta</span>}
-                </strong>
-                <span className="meta">
-                  {e.activo ? resumenHorario(e.horarios) : "No aparece en la agenda ni en tu página"}
-                </span>
-                {e.especialidades.length > 0 && <span className="meta">{e.especialidades.join(" · ")}</span>}
-              </Link>
-              <span style={{ color: "var(--tinta-400)", display: "inline-flex" }}>
-                <Icono nombre="siguiente" tamano={18} />
-              </span>
-            </li>
-          ))}
-        </ul>
-
-        <section className="tarjeta" aria-labelledby="invitar">
-          <h2 id="invitar" className="etiqueta">Invitar a tu equipo</h2>
-          <p style={{ margin: 0, fontSize: 14, color: "var(--tinta-600)" }}>
-            Mándales este enlace. Cada quien crea su cuenta y te llega su solicitud aquí para que la aceptes.
-          </p>
-          <p className="enlace-pagina">{invitacion.replace(/^https?:\/\//, "")}</p>
-          <div className="fila" style={{ gap: 8 }}>
-            <BotonCopiar texto={invitacion} etiqueta="Copiar" />
-            <a className="btn btn-sec" href={`https://wa.me/?text=${encodeURIComponent(`Únete al equipo de ${salon.nombre} en Nura para ver tu agenda: ${invitacion}`)}`} target="_blank" rel="noreferrer">
-              WhatsApp
-            </a>
-          </div>
+        <section aria-labelledby="activos" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <h2 id="activos" className="etiqueta">Activos</h2>
+          {activos.length === 0 && <p className="meta" style={{ margin: 0 }}>Todavía no hay nadie. Toca Agregar barbero.</p>}
+          <ul className="lista-equipo">
+            {activos.map((e) => {
+              const hoyTurnos = turnosDelDia(e.horarios, hoy);
+              const citas = pendientes.get(e.id) ?? { total: 0, semana: 0 };
+              const esYo = e.usuario_id === user.id;
+              return (
+                <li key={e.id} className="barbero">
+                  <div className="barbero-cabeza">
+                    {e.foto_url ? (
+                      <span className="avatar-foto">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={e.foto_url} alt="" />
+                      </span>
+                    ) : (
+                      <span className="avatar avatar-sm">{e.nombre.charAt(0).toUpperCase()}</span>
+                    )}
+                    <div className="barbero-datos">
+                      <strong>
+                        {e.nombre}
+                        {esYo ? <span className="meta"> · tú</span> : e.usuario_id ? <span className="etiqueta-azul">Con cuenta</span> : null}
+                      </strong>
+                      <span className={hoyTurnos.length ? "barbero-hoy" : "meta"}>
+                        {e.horarios.length === 0 ? "Falta su horario" : hoyTurnos.length ? `Hoy ${textoTurnos(hoyTurnos)}` : "Hoy descansa"}
+                        {citas.semana > 0 && ` · ${citas.semana} ${citas.semana === 1 ? "cita" : "citas"} esta semana`}
+                      </span>
+                      {e.horarios.length > 0 && <span className="meta">{resumenHorario(e.horarios)}</span>}
+                      {e.especialidades.length > 0 && <span className="meta">{e.especialidades.join(" · ")}</span>}
+                    </div>
+                  </div>
+                  <div className="barbero-acciones">
+                    <Link href={`/equipo/${e.id}`} className={`btn ${e.horarios.length === 0 ? "" : "btn-sec"}`}>
+                      {e.horarios.length === 0 ? "Poner horario" : "Horario y datos"}
+                    </Link>
+                    <Link href={`/agenda?e=${e.id}`} className="btn btn-sec">
+                      Agenda
+                    </Link>
+                    <MasBarbero id={e.id} nombre={e.nombre} conCuenta={!!e.usuario_id} esYo={esYo} citas={citas.total} invitacion={invitacion} salon={salon.nombre} />
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
         </section>
 
-        <section className="tarjeta" aria-labelledby="nuevo">
-          <h2 id="nuevo" className="etiqueta">Agregar sin cuenta</h2>
-          <FormularioNuevo />
-        </section>
+        {inactivos.length > 0 && (
+          <details className="tarjeta inactivos">
+            <summary>
+              Ya no trabajan aquí ({inactivos.length})
+              <Icono nombre="siguiente" tamano={16} />
+            </summary>
+            <ul className="lista-servicios">
+              {inactivos.map((e) => (
+                <li key={e.id} className="oculto">
+                  <span className="avatar avatar-sm">{e.nombre.charAt(0).toUpperCase()}</span>
+                  <span className="servicio-info">
+                    <strong>{e.nombre}</strong>
+                    <span className="meta">No aparece en la agenda ni en tu página</span>
+                  </span>
+                  <form action={cambiarActivo}>
+                    <input type="hidden" name="id" value={e.id} />
+                    <input type="hidden" name="activo" value="false" />
+                    <button type="submit" className="btn btn-sec" style={{ width: "auto", padding: "0 14px" }}>
+                      Reactivar
+                    </button>
+                  </form>
+                </li>
+              ))}
+            </ul>
+          </details>
+        )}
       </div>
       <BarraBarberia activa="cuenta" />
     </main>
