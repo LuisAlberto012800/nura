@@ -2,6 +2,7 @@ import Link from "next/link";
 import { contextoBarberia } from "@/lib/sesion";
 import { Icono, type NombreIcono } from "./Iconos";
 import { MenuEncargado } from "./MenuEncargado";
+import { ChipSupervisor } from "./ChipSupervisor";
 
 type Pestana = "hoy" | "agenda" | "subir" | "clientes" | "cuenta";
 
@@ -23,6 +24,8 @@ export async function BarraBarberia({ activa }: { activa: Pestana }) {
     </Link>
   );
   return (
+    <>
+    <ChipSupervisor vista={salon.rol === "dueno" ? "encargado" : "barbero"} />
     <nav className="barra" aria-label="Secciones">
       {LADO_A.map(enlace)}
       <Link href="/subir" aria-label="Subir trabajo" aria-current={activa === "subir" ? "page" : undefined}>
@@ -33,5 +36,6 @@ export async function BarraBarberia({ activa }: { activa: Pestana }) {
       {enlace(CLIENTES)}
       {salon.rol === "dueno" ? <MenuEncargado nombre={salon.nombre} slug={salon.slug} activa={activa === "cuenta"} /> : enlace(CUENTA)}
     </nav>
+    </>
   );
 }

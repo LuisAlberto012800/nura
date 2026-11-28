@@ -854,3 +854,25 @@ a.cupon { color: inherit; text-decoration: none; }
 .estado-activo { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; color: var(--exito-500); }
 .estado-activo::before { content: ""; width: 7px; height: 7px; border-radius: 999px; background: currentColor; }
 .complemento-accion { flex: none; display: flex; align-items: center; gap: 2px; font-size: 14px; font-weight: 800; color: var(--accion-500); }
+
+/* ---------- Modo supervisor (solo lo ve Luis) ---------- */
+.chip-supervisor {
+  position: fixed; z-index: 40; left: max(12px, env(safe-area-inset-left, 0px));
+  bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+  padding: 7px 12px; border-radius: 999px;
+  background: var(--tinta-900); color: var(--superficie-000);
+  font-size: 12px; font-weight: 700; text-decoration: none;
+  box-shadow: 0 6px 16px -8px rgba(29, 21, 17, 0.6);
+}
+.vistas { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.vista { width: 100%; display: flex; align-items: center; gap: 12px; padding: 16px; border-radius: 18px; border: 1px solid var(--borde-100); background: var(--superficie-000); font: inherit; text-align: left; cursor: pointer; color: var(--tinta-900); }
+.vista[aria-current="true"] { border-color: var(--accion-500); box-shadow: inset 4px 0 0 var(--accion-500); }
+.vista span { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.vista strong { font-size: 16px; }
+.vista small { font-size: 13px; color: var(--tinta-600); }
+.revision { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; }
+.revision li { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--borde-100); font-size: 14px; }
+.revision li:last-child { border-bottom: 0; }
+.revision b { flex: none; font-weight: 800; }
+.revision .ok { color: var(--exito-500); }
+.revision .falta { color: var(--peligro-500); }

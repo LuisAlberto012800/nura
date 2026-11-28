@@ -1,10 +1,8 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { Icono } from "@/components/Iconos";
 import { SinConfigurar } from "@/components/SinConfigurar";
 import { supabaseConfigurado } from "@/lib/supabase/config";
-import { sesionActual } from "@/lib/sesion";
-import { salonDelUsuario } from "@/lib/salon";
+import { contextoBarberia } from "@/lib/sesion";
 import { HORAS } from "@/lib/horarios";
 import { esDiaValido, fechaLarga, hoyLocal } from "@/lib/tiempo";
 import { FormularioBloqueo } from "./FormularioBloqueo";
@@ -15,10 +13,7 @@ export const dynamic = "force-dynamic";
 export default async function Bloquear({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
   if (!supabaseConfigurado) return <SinConfigurar />;
   const sp = await searchParams;
-  const { supabase, user } = await sesionActual();
-  if (!user) redirect("/entrar");
-  const salon = await salonDelUsuario(supabase, user.id);
-  if (!salon) redirect("/alta");
+  const { supabase, user, salon } = await contextoBarberia();
 
   const dia = esDiaValido(sp.dia) ? sp.dia : hoyLocal();
   const { data: equipo } = await supabase

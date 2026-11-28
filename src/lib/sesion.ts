@@ -2,6 +2,7 @@ import { cache } from "react";
 import { redirect } from "next/navigation";
 import { crearClienteServidor } from "./supabase/server";
 import { salonDelUsuario } from "./salon";
+import { esSupervisor, vistaElegida } from "./supervisor";
 
 export type Usuario = { id: string; email: string | null; user_metadata: Record<string, unknown> };
 
@@ -32,8 +33,11 @@ const salonDe = cache(async (userId: string) => {
 export async function contextoBarberia() {
   const { supabase, user } = await sesionActual();
   if (!user) redirect("/");
-  const salon = await salonDe(user.id);
-  if (!salon) redirect("/alta");
+  const propio = await salonDe(user.id);
+  if (!propio) redirect("/alta");
+  // El supervisor puede ver la app como un barbero del equipo (sin precios ni horarios).
+  const comoBarbero = propio.rol === "dueno" && esSupervisor(user.email) && (await vistaElegida()) === "barbero";
+  const salon = comoBarbero ? { ...propio, rol: "estilista" as const } : propio;
   return { supabase, user, salon };
 }
 

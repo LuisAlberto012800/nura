@@ -225,3 +225,14 @@ Los precios de la pantalla viven en `src/lib/insights.ts`; si los cambias, cámb
 Son gratis para todas las barberías. El encargado los crea en **Menú, Cupones**: elige un servicio (o todos), si el descuento es en porcentaje o en pesos, y opcionalmente fecha de vencimiento y número de usos. Los cupones marcados "Mostrar en mi página" aparecen en la página pública con un botón **Usar**; los demás solo funcionan si la clienta escribe el código al reservar. La cita guarda el precio ya con descuento, y en la agenda se ve qué cupón usó.
 
 Para que funcionen, corre antes el archivo `0007_cupones.sql`. Sin él, la página y la reserva siguen funcionando, solo que el cupón no se aplica.
+
+## Modo supervisor (solo para ti)
+
+Te deja ver la app como encargado, como barbero del equipo o como usuario, y revisar qué migraciones y ajustes faltan.
+
+1. En Vercel, abre tu proyecto, **Settings**, **Environment Variables**.
+2. Agrega `NURA_SUPERVISORES` con el correo con el que entras a Nura. Si quieres darle acceso a alguien más, sepáralos con coma.
+3. Ve a **Deployments**, en el último toca los tres puntos y **Redeploy**.
+4. Entra a Nura con ese correo. Abajo a la izquierda verás "Viendo como Encargado · cambiar"; tócalo o abre `/supervisar`.
+
+No da permisos extra: solo ves los datos de tu propia barbería, igual que siempre. Cualquier otra cuenta que abra `/supervisar` ve "no encontrado".
